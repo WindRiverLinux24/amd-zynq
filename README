@@ -1,0 +1,516 @@
+Xilinx ZYNQ Board Support Package
+
+1. About this document
+======================
+
+This document provides common and non-hardware specific information.
+Please refer to README.hardware for hardware specific information.
+
+Dependencies
+------------
+This layer depends on the oe-core version supplied with Wind River
+Linux and the wrlinux layer.
+
+
+Maintenance
+-----------
+This layer is maintained by Wind River Systems, Inc.
+Contact <support@windriver.com> or your support representative for more
+information on submitting changes.
+
+
+Building the xilinx-zynq layer
+------------------------------
+This layer and the wrlinux layer should be added to bblayers.conf.
+
+License
+-------
+Copyright (C) 2018 Wind River Systems, Inc.
+
+The right to copy, distribute or otherwise make use of this software may
+be licensed only pursuant to the terms of an applicable Wind River license
+agreement. No license to Wind River intellectual properly rights is granted
+herein. All rights not licensed by Wind River are reserved by Wind River.
+
+Source code included in the tree for individual recipes is under the LICENSE
+stated in each recipe (.bb file) unless otherwise stated.
+
+
+2. BSP Kernel and Distros
+=========================
+
+The following table summarizes the valid Wind River Linux distros for this BSP.
+'Y' in each content cell stands for supported; 'N' stands for not supported:
+
+  +--------------+-------------+-------------+-------------+
+  | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-ovp |
+  +--------------+-------------+-------------+-------------+
+  |    valid     |      Y      |      N      |      N      |
+  +--------------+-------------+-------------+-------------+
+
+For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
+by running 'bitbake -e | grep "^TARGET_SUPPORTED_KTYPES"'.
+
+Note: The preempt-rt ktype is not available for this BSP/Machine at this time.
+
+
+3. Board Specific Patches
+=========================
+
+To get a list of patches applied to the kernel specific to this BSP,
+along with patch descriptions, use git to see what changed on the default
+kernel (git whatchanged <kernel_type>..<bsp_name>). For example:
+
+	# cd tmp-glibc/work-shared/bspname/kernel-source
+	# git whatchanged standard/base..HEAD
+
+
+4. Boot Instructions
+====================
+
+It is necessary to load the DTB (device tree blob) into the target's memory
+prior to booting the kernel uImage. The DTB file can be found in the export
+directory after building a project, or you can generate it manually with the
+following commands:
+
+	# bitbake -c devshell virtual/kernel
+	# make zynq-<Board Name>.dtb
+
+Note: <Board Name> can be one of the ZYNQ boards' name, such as zc706, zc702.
+
+The DTB can then be found in the directory:
+  tmp-glibc/work/xilinx_zynq-wrs-linux-gnueabi/linux-yocto/<kernel version>/linux-xilinx_zynq-<kernel type>-build/arch/arm/boot/dts/
+
+Copy the DTB image to MMC/SD or QSPI Flash, and use u-boot's fatload command
+to transfer it to the board before booting along with kernel image.
+
+
+4.1 Boot from MMC/SD card
+-------------------------
+
+MMC/SD can be set as the default boot device for this board, and two
+partitions have been created on the MMC/SD card by default. The first one
+is a boot partition while the second is root filesystem, which can be
+created by the fdisk command on the host machine.
+
+Note: Refer to the README.hardware file for further details about the
+configuration for setting MMC/SD as the first boot device.
+
+4.1.1 Create two partitions and store the u-boot image
+------------------------------------------------------
+(1) Create two partitions on the MMC/SD card.
+
+	# fdisk /dev/mmcblk0
+
+Suppose the device node for the MMC/SD card on the host machine is
+/dev/mmcblk0.
+
+(2) Create a VFAT filesystem on the first partition.
+
+	# mkfs.vfat /dev/mmcblk0p1
+
+(3) Copy the BOOT.BIN file to /dev/mmcblk0p1.
+
+For the board mini-itx, since the bitstream for
+PCIe support is different from non-PCIe features, the jumpers must be
+set in addition to replacing  BOOT.BIN.
+See the bootloader's README for additional details.
+
+	# mkdir /mnt/sd
+	# mount -t vfat /dev/mmcblk0p1 /mnt/sd
+	# cp BOOT.BIN /mnt/sd
+	# umount /mnt/sd
+
+
+4.1.2 Copy the kernel image and DTB image to /dev/mmcblk0p1
+-------------------------------------------------------
+
+	# mkdir /mnt/sd
+	# mount /dev/mmcblk0p1 /mnt/sd
+	# cd <buildprj>/export/images/
+	# cp zImage-xilinx-zynq.bin  /mnt/sd/zImage
+	# cp zImage-zynq-<Board Name>.dtb /mnt/sd/devicetree.dtb
+	# umount /mnt/sd
+
+
+4.1.3 Decompress the MMC/SD root filesystem
+---------------------------------------
+
+Assuming the second partition is used for the root filesystem, format it
+with one of the popular filesystem types supported by Linux, such as
+ext3. Then, mount and deploy the root filesystem image to the partition:
+
+	# mkfs.ext4 /dev/mmcblk0p2
+	# mount /dev/mmcblk0p2 /mnt/sd
+	# cd <buildprj>/export/images/
+	# tar -C /mnt/sd -jxf wrlinux-image-glibc-std-xilinx-zynq.tar.bz2 --numeric-owner
+	# umount /mnt/sd
+
+
+4.1.4 Boot from the MMC/SD card
+---------------------------
+
+To boot from the MMC/SD card, use u-boot commands as follows:
+
+	# mmcinfo
+	# fatload mmc 0 0x2a00000 devicetree.dtb
+	# fatload mmc 0 0x3000000 zImage
+	# setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
+	# bootz 0x3000000 - 0x2a00000
+
+
+4.2 Boot kernel from QSPI Flash
+-------------------------------
+
+4.2.1 QSPI Flash layout
+-----------------------
+
+The storage capacity of the QSPI flash on ZYNQ board is 16MB. The following
+default partitions have been created on it:
+
+	Start			End		Definition
+	0x0			0x100000	qspi-fsbl-uboot
+	0x100000		0x600000	qspi-linux
+	0x600000		0x620000	qspi-device-tree
+	0x620000		0xc00000	qspi-rootfs
+	0xc00000		0x1000000	qspi-bitstream
+
+CAUTION: Do not burn the bootloader partition for FSBL and u-boot. If
+needed, you can burn the layout of the rest of the QSPI flash.
+
+You also need to modify the QSPI flash device node in the following DTB source file to
+reflect such changes:
+
+	tmp-glibc/work-shared/xilinx-zynq/kernel-source/arch/arm/boot/dts/zynq-<Board Name>.dts
+
+Then re-generate the DTB image as described above.
+
+
+4.2.2 Save bootloader image to the bootloader partitions
+--------------------------------------------------------
+
+	# mmcinfo
+	# fatload mmc 0 0x100000 BOOT.BIN
+	# sf probe 0
+	# sf erase 0 0x100000
+	# sf write 0x100000 0 ${filesize}
+
+Before writing to flash, you need to know its current layout. You can
+get this information by running the 'cat /proc/mtd' command after booting
+from an MMC/SD device or NFS server. When loading the BOOT.BIN image from 
+the MMC/SD card, its file size will be automatically recorded in u-boot's 
+"filesize" variable, which can be leveraged later.
+
+
+4.2.3 Update DTB to support booting from QSPI flash
+---------------------------------------------------
+
+	# mmcinfo
+	# fatload mmc 0 0x2a00000 devicetree.dtb
+	# sf probe 0
+	# sf erase 0x600000 0x20000
+	# sf write 0x2a00000 0x600000 ${filesize}
+
+
+4.2.4 Copy kernel image
+-----------------------
+
+	# mmcinfo
+	# fatload mmc 0 0x3000000 zImage
+	# sf probe 0
+	# sf erase 0x100000 0x500000
+	# sf write 0x3000000 0x100000 ${filesize}
+
+
+4.2.5 Boot the kernel image
+-----------------------------
+
+	# sf probe 0
+	# sf read 0x2a00000 0x600000 0x20000
+	# sf read 0x3000000 0x100000 0x500000
+	# bootz 0x3000000 - 0x2a00000
+
+
+4.2.6 Target Note
+-----------------
+
+Since the size of the qspi-rootfs partition is no more than 8 MB, it is too
+small to accommodate a reasonable jffs2 filesystem, which can be as large as
+60 MB.  Therefore, you cannot deploy a jffs2 filesystem on QSPI flash, and the
+DTB defaults to mounting the root filesystem from the MMC/SD card.
+
+
+4.3 NFS Root File System
+------------------------
+
+4.3.1 Prepare NFS and TFTP servers
+----------------------------------
+
+The files in the above example can be found in <buildprj>/export/images and
+are copied to the NFS/TFTP server directory.
+
+
+4.3.2 Boot from NFS root filesystem
+-----------------------------------
+
+To boot from an NFS image, execute use following u-boot commands:
+
+	# setenv ipaddr 192.168.1.10
+	# setenv serverip 192.168.1.1
+	# setenv rootpath /nfsexport
+	# setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/nfs rw nfsroot=$serverip:$rootpath ip=dhcp
+	# tftpboot 0x3000000 zImage-xilinx-zynq.bin
+	# tftpboot 0x2a00000 zImage-zynq-<Board Name>.dtb
+	# bootz 0x3000000 - 0x2a00000
+
+
+5. Features
+===========
+
+5.1 DRM HDMI display
+--------------------
+
+5.1.1 Introduction
+------------------
+
+The boot image boot_zc702_adv7511.bin and boot_zc706_adv7511.bin include FPGA video
+design in Programmable Logic (PL) to show the capabilities of HDMI display on both
+zc702 and zc706 board.
+
+5.1.2 Usage and verification
+----------------------------
+
+A glibc-std-sato filesystem is used to start matchbox on an HDMI monitor, so
+the "--distros glibc-std-sato" parameter should be passd to setup.sh:
+        ../setup.sh --distros glibc-std-sato ...
+
+before rebuilding:
+        bitbake wrlinux-image-glibc-std-sato
+
+5.2 Coresight operations on Xilinx-7000 series:
+-----------------------------------------------
+
+5.2.1 Introduction
+------------------
+
+The ARM CoreSight architecture defines four classes of CoreSight components:
+access and control, trace source, trace link, and trace sink. Components
+of the access and control class provide a user interface to access the
+debug infrastructure through memory-mapped locations and JTAG (not involved).
+
+The Xilinx 7000 series PS and PL can be debugged together as a complete
+system using intrusive and non-intrusive debug techniques. This testing
+and debugging capability is based on the ARM CoreSight Architecture Specification
+and consists mostly of ARM-supplied components, but also includes one
+Xilinx-supplied component (FTM Programmable Logic Test and Debug).
+
+Coresight is enabled using KERNEL_FEATURES_append in local.conf during
+project configuration. The following command illustrates this step:
+
+echo "KERNEL_FEATURES_append = \" features/coresight/coresight.scc\"" >> conf/local.conf
+
+5.2.2 Usage and verification
+----------------------------
+
+root@QZ706:~#
+root@QZ706:~# cd /sys/bus/coresight/devices
+root@QZ706:/sys/bus/coresight/devices# ls
+amba:replicator  f8803000.tpiu	  f889c000.ptm
+f8801000.etb	 f8804000.funnel  f889d000.ptm
+root@QZ706:/sys/bus/coresight/devices#
+root@QZ706:/sys/bus/coresight/devices# echo 1 > f8801000.etb/enable_sink
+root@QZ706:/sys/bus/coresight/devices# cd f889c000.ptm
+root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# ls
+addr_acctype  cntr_rld_event  etmsr	      seq_12_event    subsystem
+addr_idx      cntr_rld_val    fifofull_level  seq_13_event    sync_freq
+addr_range    cntr_val	      mode	      seq_21_event    timestamp_event
+addr_single   ctxid_idx       nr_addr_cmp     seq_23_event    traceid
+addr_start    ctxid_mask      nr_cntr	      seq_31_event    trigger_event
+addr_stop     ctxid_pid       nr_ctxid_cmp    seq_32_event    uevent
+cntr_event    enable_event    power	      seq_curr_state
+cntr_idx      enable_source   reset	      status
+root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# echo 1 > enable_source
+coresight-etb10 f8801000.etb: ETB enabled
+coresight-replicator amba:replicator: REPLICATOR enabled
+coresight-funnel f8804000.funnel: FUNNEL inport 0 enabled
+coresight-etm3x f889c000.ptm: ETM tracing enabled
+root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# cd ../f8801000.etb
+root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# ls mgmt/
+ctl  ffcr  ffsr  rdp  rrp  rwp  sts  trg
+root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
+0x188								<--- changed everytime when cat mgmt/rwp
+root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
+0x1ee								<--- changed everytime when cat mgmt/rwp
+root@QZ706:~# cd
+root@QZ706:~# dd if=/dev/f8801000.etb of=etb
+dd if=/dev/f8801000.etb of=etb
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+coresight-etb10 f8801000.etb: ETB dumped
+8+0 records in
+8+0 records out
+4096 bytes (4.1 kB) copied, 0.0466603 s, 87.8 kB/s
+root@QZ706:~#
+
+Refer to Documentation/trace/coresight.txt for more information.
+
+
+5.3 IEEE 1588 PTP testing
+-------------------------
+
+5.3.1 Introduction
+------------------
+
+This testing method is based on the Linux PTP project, which provides a robust
+implementation of the standard and uses the most relevant and modern API
+offered by the Linux kernel. Only basic testing is done on this BSP because
+accurate PTP testing is a bit complicated according to IEEE PTPv2.
+
+5.3.2 Usage and verification
+----------------------------
+
+Two boards are necessary for this case, one will be used as master, another as slave.
+The following commands show how to use PTP time in stamping mode based on the
+peer delay (P2P) mechanism:
+
+     master :
+     root@128:/# ptp4l -i eth0 -m -P
+     ptp4l[74.527]: selected /dev/ptp0 as PTP clock
+     ptp4l[74.541]: driver changed our HWTSTAMP options
+     ptp4l[74.541]: tx_type   1 not 1
+     ptp4l[74.541]: rx_filter 1 not 12
+     ptp4l[74.542]: port 1: INITIALIZING to LISTENING on INITIALIZE
+     ptp4l[74.546]: port 0: INITIALIZING to LISTENING on INITIALIZE
+     ptp4l[81.917]: port 1: LISTENING to MASTER on ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES
+     ptp4l[81.917]: selected best master clock 000a35.fffe.000120
+     ptp4l[81.917]: assuming the grand master role
+
+     slave:
+     root@128:/# ptp4l -i eth0 -s -m -P &
+     ptp4l[74.527]: selected /dev/ptp0 as PTP clock
+     ptp4l[4059.640]: selected /dev/ptp0 as PTP clock
+     ptp4l[4059.643]: driver changed our HWTSTAMP options
+     ptp4l[4059.643]: tx_type   1 not 1
+     ptp4l[4059.643]: rx_filter 1 not 12
+     ptp4l[4059.643]: port 1: INITIALIZING to LISTENING on INITIALIZE
+     ptp4l[4059.644]: port 0: INITIALIZING to LISTENING on INITIALIZE
+     ptp4l[4066.659]: selected best master clock 000a35.fffe.000122
+
+5.4 Audio feature
+-----------------
+
+5.4.1 Audio HDMI playback
+-------------------------
+
+Connect the board and a HDMI display with a HDMI cable,
+then run below command:
+        # speaker-test -c2 -twav
+
+
+6. Creating Partitioned Images(WIC)
+===================================
+
+You can use the OpenEmbedded Image Creator, wic, to create a properly
+partitioned image on an SD card. The wic command generates partitioned images
+from existing OpenEmbedded build artifacts.
+For more information about WIC, see:
+
+http://www.yoctoproject.org/docs/2.2/mega-manual/mega-manual.html#creating-partitioned-images
+
+This BSP supports SD card disk images.
+After building the project, you will have a WIC image under the directory
+tmp-glibc/deploy/images/<bsp name>/, for example:
+
+tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-glibc-<rootfs_type>-xilinx-zynq.wic
+
+You can then write the output image to an SD card.
+
+6.1 Burn images to SD card
+--------------------------
+
+To burn u-boot and WIC images to an SD card, you need to execute two steps:
+
+1) Burn the WIC image
+
+# dd if=wrlinux-image-glibc-<rootfs_type>-xilinx-zynq.wic of=/dev/your_sd_dev
+
+2) Create boot.bin for special board
+
+Insert SD card into USB card reader, and then attach the USB card reader onto PC host.
+If /dev/sdx1 partition is not mounted automatically, please mount it manually.
+Then the path of mounting /dev/sdx1 partition, for example, /media/boot.
+At last, Create boot.bin file for special board as below:
+
+ - zc702 board
+   # sudo cp boot_zc702.bin boot.bin
+
+ - zc702 board with HDMI diaplay
+   # sudo cp boot_zc702_adv7511.bin boot.bin
+
+ - zc706 board
+   # sudo cp boot_zc706.bin boot.bin
+
+ - zc706 board with HDMI diaplay
+   # sudo cp boot_zc706_adv7511.bin boot.bin
+
+6.2 Set u-boot env
+------------------
+
+The board can boot automatically by setting the following uboot environment variables:
+
+=> setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
+
+=> setenv bootcmd "fatload mmc 0 ${netstart} zImage;fatload mmc 0 ${dtbnetstart} zImage-zynq-zc702.dtb; \
+   bootz ${netstart} - ${dtbnetstart}"
+
+=> saveenv; run bootcmd;
+
+Note: For xilinx-zynq pl, you should copy your boot.bin to replace the old version.
+Note: Above environment variables example is based on zc702 board. For other boards, please
+      do corresponding adjustment.
+
+6.2 devcfg
+==========
+
+6.2.1 Introduction
+------------------
+
+The Zynq Programmable Logic (PL) can be programmed by the First Stage Bootloader (FSBL),
+U-Boot or through Linux. Programming the PL at different stages may be advantageous for
+different projects and workflows, here is programming the PL through Linux.
+
+
+6.2.2 Usage and verification
+----------------------------
+
+   $ cat bitstream.bit > /dev/xdevcfg
+
+   $ cat /sys/class/xdevcfg/xdevcfg/device/prog_done
+   #if programming is successful, the resulte is 1.
+   1
+
+6.3 kexec and kdump
+===================
+
+You need to add feature/kexec support as follow:
+
+	./wrlinux-x/setup.sh --machines xilinx-zynq --templates feature/kexec,feature/kdump
+
+6.3.1 kexec
+-----------
+
+	kexec -l  /root/vmlinux --append="`cat /proc/cmdline`"
+	kexec -e
+
+6.3.2 kdump
+-----------
+
+Add crashkernel=256M@128M to the kernel cmdline
+   kexec -p /boot/zImage -append="$your-bootcmd"
+   echo c > /proc/sysrq-trigger
