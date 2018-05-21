@@ -1,3 +1,3 @@
-IMAGE_INSTALL += "u-boot-wic"
-IMAGE_INSTALL += "u-boot-xlnx"
-IMAGE_INSTALL += "ptpd"
+IMAGE_INSTALL_xilinx-zynq += "u-boot-wic"
+IMAGE_INSTALL_xilinx-zynq += "u-boot-xlnx"
+IMAGE_INSTALL_xilinx-zynq += "ptpd"
