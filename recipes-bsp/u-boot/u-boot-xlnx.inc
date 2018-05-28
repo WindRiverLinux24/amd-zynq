@@ -7,6 +7,7 @@ UBRANCH ?= "master"
 
 UBRANCHARG = "${@['nobranch=1', 'branch=${UBRANCH}'][d.getVar('UBRANCH', True) != '']}"
 SRC_URI = "${UBOOTURI};${UBRANCHARG}"
-SRC_URI += "file://0001-net-Use-packed-structures-for-networking.patch"
+SRC_URI += "file://0001-net-Use-packed-structures-for-networking.patch \
+	    file://0002-Makefile-Correct-SPL-DTB-build-race-condition.patch"
 
 S = "${WORKDIR}/git"
