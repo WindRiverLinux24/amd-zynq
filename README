@@ -25,7 +25,7 @@ This layer and the wrlinux layer should be added to bblayers.conf.
 
 License
 -------
-Copyright (C) 2018 Wind River Systems, Inc.
+Copyright (C) 2019 Wind River Systems, Inc.
 
 The right to copy, distribute or otherwise make use of this software may
 be licensed only pursuant to the terms of an applicable Wind River license
@@ -42,11 +42,11 @@ stated in each recipe (.bb file) unless otherwise stated.
 The following table summarizes the valid Wind River Linux distros for this BSP.
 'Y' in each content cell stands for supported; 'N' stands for not supported:
 
-  +--------------+-------------+-------------+-------------+
-  | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-ovp |
-  +--------------+-------------+-------------+-------------+
-  |    valid     |      Y      |      N      |      N      |
-  +--------------+-------------+-------------+-------------+
+  +--------------+-------------+-------------+------------------+
+  | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-std-sato |
+  +--------------+-------------+-------------+------------------+
+  |    valid     |      Y      |      N      |         y        |
+  +--------------+-------------+-------------+------------------+
 
 For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
 by running 'bitbake -e virtual/kernel | grep "^TARGET_SUPPORTED_KTYPES="'.
@@ -61,7 +61,7 @@ To get a list of patches applied to the kernel specific to this BSP,
 along with patch descriptions, use git to see what changed on the default
 kernel (git whatchanged <kernel_type>..<bsp_name>). For example:
 
-	# cd tmp-glibc/work-shared/bspname/kernel-source
+	# cd path_to_project/tmp-glibc/work-shared/xilinx-zynq/kernel-source
 	# git whatchanged standard/base..HEAD
 
 
@@ -111,11 +111,6 @@ Suppose the device node for the MMC/SD card on the host machine is
 
 (3) Copy the BOOT.BIN file to /dev/mmcblk0p1.
 
-For the board mini-itx, since the bitstream for
-PCIe support is different from non-PCIe features, the jumpers must be
-set in addition to replacing  BOOT.BIN.
-See the bootloader's README for additional details.
-
 	# mkdir /mnt/sd
 	# mount -t vfat /dev/mmcblk0p1 /mnt/sd
 	# cp BOOT.BIN /mnt/sd
@@ -123,7 +118,7 @@ See the bootloader's README for additional details.
 
 
 4.1.2 Copy the kernel image and DTB image to /dev/mmcblk0p1
--------------------------------------------------------
+-----------------------------------------------------------
 
 	# mkdir /mnt/sd
 	# mount /dev/mmcblk0p1 /mnt/sd
@@ -134,7 +129,7 @@ See the bootloader's README for additional details.
 
 
 4.1.3 Decompress the MMC/SD root filesystem
----------------------------------------
+-------------------------------------------
 
 Assuming the second partition is used for the root filesystem, format it
 with one of the popular filesystem types supported by Linux, such as
@@ -148,7 +143,7 @@ ext3. Then, mount and deploy the root filesystem image to the partition:
 
 
 4.1.4 Boot from the MMC/SD card
----------------------------
+-------------------------------
 
 To boot from the MMC/SD card, use u-boot commands as follows:
 
@@ -223,7 +218,7 @@ the MMC/SD card, its file size will be automatically recorded in u-boot's
 
 
 4.2.5 Boot the kernel image
------------------------------
+---------------------------
 
 	# sf probe 0
 	# sf read 0x2a00000 0x600000 0x20000
@@ -273,9 +268,9 @@ To boot from an NFS image, execute use following u-boot commands:
 5.1.1 Introduction
 ------------------
 
-The boot image boot_zc702_adv7511.bin and boot_zc706_adv7511.bin include FPGA video
-design in Programmable Logic (PL) to show the capabilities of HDMI display on both
-zc702 and zc706 board.
+The specific adv7511 boot image BOOT.BIN built from bootloader/README for zc702
+and zc706 include multimedia design to show the capabilities of HDMI display by
+onboard HDMI interfaces.
 
 5.1.2 Usage and verification
 ----------------------------
@@ -298,11 +293,11 @@ access and control, trace source, trace link, and trace sink. Components
 of the access and control class provide a user interface to access the
 debug infrastructure through memory-mapped locations and JTAG (not involved).
 
-The Xilinx 7000 series PS and PL can be debugged together as a complete
-system using intrusive and non-intrusive debug techniques. This testing
-and debugging capability is based on the ARM CoreSight Architecture Specification
-and consists mostly of ARM-supplied components, but also includes one
-Xilinx-supplied component (FTM Programmable Logic Test and Debug).
+The Xilinx 7000 series PS and PL can be debugged together as a complete system
+using intrusive and non-intrusive debug techniques. This testing and debugging
+capability is based on the ARM CoreSight and consists mostly of ARM-supplied
+components, but also includes one Xilinx-supplied component (FTM Programmable
+Logic Test and Debug).
 
 Coresight is enabled using KERNEL_FEATURES_append in local.conf during
 project configuration. The following command illustrates this step:
@@ -338,9 +333,9 @@ root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# cd ../f8801000.etb
 root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# ls mgmt/
 ctl  ffcr  ffsr  rdp  rrp  rwp  sts  trg
 root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
-0x188								<--- changed everytime when cat mgmt/rwp
+0x188				<--- changed everytime when cat mgmt/rwp
 root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
-0x1ee								<--- changed everytime when cat mgmt/rwp
+0x1ee				<--- changed everytime when cat mgmt/rwp
 root@QZ706:~# cd
 root@QZ706:~# dd if=/dev/f8801000.etb of=etb
 dd if=/dev/f8801000.etb of=etb
@@ -359,7 +354,6 @@ coresight-etb10 f8801000.etb: ETB dumped
 root@QZ706:~#
 
 Refer to Documentation/trace/coresight.txt for more information.
-
 
 5.3 IEEE 1588 PTP testing
 -------------------------
@@ -380,41 +374,16 @@ The following commands show how to use PTP time in stamping mode based on the
 peer delay (P2P) mechanism:
 
      master :
-     root@128:/# ptp4l -i eth0 -m -P
-     ptp4l[74.527]: selected /dev/ptp0 as PTP clock
-     ptp4l[74.541]: driver changed our HWTSTAMP options
-     ptp4l[74.541]: tx_type   1 not 1
-     ptp4l[74.541]: rx_filter 1 not 12
-     ptp4l[74.542]: port 1: INITIALIZING to LISTENING on INITIALIZE
-     ptp4l[74.546]: port 0: INITIALIZING to LISTENING on INITIALIZE
-     ptp4l[81.917]: port 1: LISTENING to MASTER on ANNOUNCE_RECEIPT_TIMEOUT_EXPIRES
-     ptp4l[81.917]: selected best master clock 000a35.fffe.000120
-     ptp4l[81.917]: assuming the grand master role
+     root@128:/# ptpd2 -i eth0 -MV
 
      slave:
-     root@128:/# ptp4l -i eth0 -s -m -P &
-     ptp4l[74.527]: selected /dev/ptp0 as PTP clock
-     ptp4l[4059.640]: selected /dev/ptp0 as PTP clock
-     ptp4l[4059.643]: driver changed our HWTSTAMP options
-     ptp4l[4059.643]: tx_type   1 not 1
-     ptp4l[4059.643]: rx_filter 1 not 12
-     ptp4l[4059.643]: port 1: INITIALIZING to LISTENING on INITIALIZE
-     ptp4l[4059.644]: port 0: INITIALIZING to LISTENING on INITIALIZE
-     ptp4l[4066.659]: selected best master clock 000a35.fffe.000122
+     root@128:/# ptpd2 -i eth0 -sV --section:kp=0.32 --section:ki=0.05
 
-5.4 Audio feature
------------------
-
-5.4.1 Audio HDMI playback
--------------------------
-
-Connect the board and a HDMI display with a HDMI cable,
-then run below command:
-        # speaker-test -c2 -twav
+If master starts timing services succuessfully, then ptpd works fine.
 
 
-6. Creating Partitioned Images(WIC)
-===================================
+5.4. Creating Partitioned Images(WIC)
+------------------------------------
 
 You can use the OpenEmbedded Image Creator, wic, to create a properly
 partitioned image on an SD card. The wic command generates partitioned images
@@ -431,8 +400,8 @@ tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-glibc-<rootfs_type>-xilinx-zyn
 
 You can then write the output image to an SD card.
 
-6.1 Burn images to SD card
---------------------------
+5.4.1 Burn images to SD card
+----------------------------
 
 To burn u-boot and WIC images to an SD card, you need to execute two steps:
 
@@ -440,27 +409,16 @@ To burn u-boot and WIC images to an SD card, you need to execute two steps:
 
 # dd if=wrlinux-image-glibc-<rootfs_type>-xilinx-zynq.wic of=/dev/your_sd_dev
 
-2) Create boot.bin for special board
+2) Create boot.bin for ZC702/6 board
 
 Insert SD card into USB card reader, and then attach the USB card reader onto PC host.
 If /dev/sdx1 partition is not mounted automatically, please mount it manually.
-Then the path of mounting /dev/sdx1 partition, for example, /media/boot.
-At last, Create boot.bin file for special board as below:
+Then, deploy BOOT.BIN file for the specific board according to bootloader/README:
 
- - zc702 board
-   # sudo cp boot_zc702.bin boot.bin
+   # sudo cp path_to_BOOT.BIN path_to_sdx1_mount_point
 
- - zc702 board with HDMI diaplay
-   # sudo cp boot_zc702_adv7511.bin boot.bin
-
- - zc706 board
-   # sudo cp boot_zc706.bin boot.bin
-
- - zc706 board with HDMI diaplay
-   # sudo cp boot_zc706_adv7511.bin boot.bin
-
-6.2 Set u-boot env
-------------------
+5.4.2 Set u-boot env
+--------------------
 
 The board can boot automatically by setting the following uboot environment variables:
 
@@ -475,42 +433,67 @@ Note: For xilinx-zynq pl, you should copy your boot.bin to replace the old versi
 Note: Above environment variables example is based on zc702 board. For other boards, please
       do corresponding adjustment.
 
-6.2 devcfg
-==========
-
-6.2.1 Introduction
-------------------
-
-The Zynq Programmable Logic (PL) can be programmed by the First Stage Bootloader (FSBL),
-U-Boot or through Linux. Programming the PL at different stages may be advantageous for
-different projects and workflows, here is programming the PL through Linux.
-
-
-6.2.2 Usage and verification
-----------------------------
-
-   $ cat bitstream.bit > /dev/xdevcfg
-
-   $ cat /sys/class/xdevcfg/xdevcfg/device/prog_done
-   #if programming is successful, the resulte is 1.
-   1
-
-6.3 kexec and kdump
-===================
+5.5 kexec and kdump
+-------------------
 
 You need to add feature/kexec support as follow:
 
 	./wrlinux-x/setup.sh --machines xilinx-zynq --templates feature/kexec,feature/kdump
 
-6.3.1 kexec
+5.5.1 kexec
 -----------
 
 	kexec -l  /root/vmlinux --append="`cat /proc/cmdline`"
 	kexec -e
 
-6.3.2 kdump
+5.5.2 kdump
 -----------
 
 Add crashkernel=256M@128M to the kernel cmdline
-   kexec -p /boot/zImage -append="$your-bootcmd"
+   kexec -p /boot/zImage --append="$your-bootcmd"
    echo c > /proc/sysrq-trigger
+
+
+5.6 FPGA bitstream infusion
+---------------------------
+
+5.6.1 introduction
+------------------
+
+The Zynq Programmable Logic can be programmed either using fsbl, U-Boot or
+through Linux. Here is a link to provide the details about programming the
+PL from Linux world:
+  https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841645/Solution+Zynq+PL+Programming+With+FPGA+Manager
+
+Notes:
+
+The descriptions in subsequent sections refer to use of Device Tree Overlay
+fragments with FPGA manager framework. It has to be noted that they are not
+supported in official Xilinx SDK release, and WRLinux just keep them AS-IS
+too. It means you should read and study the related tech documents to make
+sure the match between your bitstream design logic and the overlay dtsi, or
+it might malfunction your hardware devices.
+
+5.6.2 Usage
+-----------
+
+Below sections describe steps just to infuse the default bitstream from SDK
+v2018.3 without the extra considerations on dtsi match since they had already
+been done by the vendor. Actually we can just skip over the dtsi part since
+all interfaces have already been into Linux side.
+
+Here, BSP prebuilt xilinx-zc702/6-2018.3/pre-built/linux/images/system.bit
+is used to validate this function, which will be built into system.bit.bin
+according to the link above.
+
+	#> echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
+	fpga_manager fpga0: writing system.bit.bin to Xilinx Zynq FPGA Manager
+
+	#> cat /sys/class/fpga_manager/fpga0/name
+	Xilinx Zynq FPGA Manager
+
+Notes:
+
+The default firmware path is /lib/firmware, which you should deploy your FPGA
+bitstream bin file into /lib/firmware before you echo the name of it into the
+sys firmware interface. Please refer to the link above for more detailed info.

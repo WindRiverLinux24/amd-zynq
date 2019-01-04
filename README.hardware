@@ -21,7 +21,10 @@ This BSP supports the following boards:
 =================
 
   - 2018/05 (US109729) : Wind River Linux 10: standard support for ZC702, ZC706
-			Based on xilinx-sdk-2017-04.
+			 Based on Xilinx SDK v2017.4
+
+  - 2018/12 (US126062) : Wind River Linux10.18 RCPL04 standard support for ZC702
+			 and ZC706 Based on Xilinx SDK v2018.3
 
 3. BSP Features
 ===============
@@ -49,7 +52,7 @@ the corresponding h/w features exist.
   o Network
 	+ GEM: On-Chip Gigabit Ethernet Controller
 	+ PHY: Marvell 88E1116R
-	+ IEEE 1588 PTP (ZC706, Picozed excluded)
+	+ IEEE 1588 PTP
 
   o Storage
 	+ NOR Flash:
@@ -79,9 +82,8 @@ the corresponding h/w features exist.
 The following features are not supported and validated:
 
   o Bus
-	x CAN (PL)
-	x SATA (PL)
-	x SFP (PL, zc706)
+	x SFP (PL, zc706, needs specific TRD)
+	x FMC (Needs specific hardware to support special apps)
 
 4. BSP Notes
 ============
@@ -99,15 +101,15 @@ For ZYNQ ZC706 board:
 
 	Processor:             ZYNQ XC7Z045
 	Board Revision:        HW-Z7-ZC706 REV 1.2
-	BootLoader:            U-Boot
-	BootLoader Version:    U-Boot 2017.01
+	BootLoader:            U-Boot (ZC706 customized)
+	BootLoader Version:    U-Boot 2018.01
 
 For ZYNQ ZC702 board:
 
 	Processor:             ZYNQ XC7Z020
 	Board Revision:        HW-Z7-ZC702 REV 1.2
-	BootLoader:            U-Boot
-	BootLoader Version:    U-Boot 2017.01
+	BootLoader:            U-Boot (ZC702 customized)
+	BootLoader Version:    U-Boot 2018.01
 
 4.1.2 Specify boot medium
 -------------------------
@@ -214,32 +216,14 @@ fanned out from PL.
 
 There are dtbs in path_to_project/build/tmp-glibc/deploy/images/xilinx-zynq/ as follows:
 
-  zImage-zynq-zc706.dtb
-  zImage-zynq-zc706-adv7511.dtb
-  zImage-zynq-zc702.dtb
-  zImage-zynq-zc702-adv7511.dtb
+  zynq-zc706.dtb
+  zynq-zc706-adv7511.dtb
+  zynq-zc702.dtb
+  zynq-zc702-adv7511.dtb
 
 Which are used to boot the board as the following matches:
 
-  zImage-zynq-zc706.dtb for ZC706 board
-  zImage-zynq-zc706-adv7511.dtb for ZC706 board with HDMI display feature
-  zImage-zynq-zc702.dtb for ZC702 board
-  zImage-zynq-zc702-adv7511.dtb for ZC702 board with HDMI display feature
-
-4.1.6 IEEE 1588 PTP Capabilities on Zynq-7000:
-----------------------------------------------
-
-The IEEE 1588 standard describes the protocol which synchronizes the system
-clocks of the different connected devices. Nanosecond level clock sync among
-connected devices is one of the primary requirements for many applications in
-automation, motion control, consumer electronics, Audio Video broadcasting(AVB)
-and telecommunications market segments. Achieving this timing requirement
-requires robust, responsive and error-free design and implementations in both
-software and hardware design.
-
-hardware-transmit (SOF_TIMESTAMPING_TX_HARDWARE)
-hardware-receive (SOF_TIMESTAMPING_RX_HARDWARE)
-hardware-raw-clock (SOF_TIMESTAMPING_RAW_HARDWARE)
-
-Currently, the following PTP ioctls are not implemented:
-PTP_PF_EXTTS,PTP_PF_PEROUT,PTP_EXTTS_REQUEST, PTP_PEROUT_REQUEST, PTP_ENABLE_PPS
+  zynq-zc706.dtb for ZC706 board
+  zynq-zc706-adv7511.dtb for ZC706 board with HDMI display feature
+  zynq-zc702.dtb for ZC702 board
+  zynq-zc702-adv7511.dtb for ZC702 board with HDMI display feature
