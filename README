@@ -74,7 +74,7 @@ directory after building a project, or you can generate it manually with the
 following commands:
 
 	# bitbake -c devshell virtual/kernel
-	# make zynq-<Board Name>.dtb
+	# make xilinx/zynq-<Board Name>.dtb
 
 Note: <Board Name> can be one of the ZYNQ boards' name, such as zc706, zc702.
 
