@@ -20,11 +20,8 @@ This BSP supports the following boards:
 2. Change History
 =================
 
-  - 2018/05 (US109729) : Wind River Linux 10: standard support for ZC702, ZC706
-			 Based on Xilinx SDK v2017.4
-
-  - 2018/12 (US126062) : Wind River Linux10.18 RCPL04 standard support for ZC702
-			 and ZC706 Based on Xilinx SDK v2018.3
+  - 2019/06 (LINUXPG-150): WindRiver CI/CD branch support: Add BSP support for ZC702
+			 and ZC706 based on xilinx-sdk-2019.01
 
 3. BSP Features
 ===============
@@ -42,7 +39,6 @@ the corresponding h/w features exist.
   o Bus
 	+ I2C: On-Chip I2C controller
 	+ QSPI: On-Chip Quad-SPI flash controller
-	+ SPI: On-Chip SPI controller
 
   o Multimedia (PL)
 	+ DRM Graphic: ADI AXI video controller
@@ -52,7 +48,6 @@ the corresponding h/w features exist.
   o Network
 	+ GEM: On-Chip Gigabit Ethernet Controller
 	+ PHY: Marvell 88E1116R
-	+ IEEE 1588 PTP
 
   o Storage
 	+ NOR Flash:
@@ -72,7 +67,6 @@ the corresponding h/w features exist.
 	+ GPIO: On-Chip general purpose I/O peripheral
 	+ RTC: RTC-8564JE, I2C RTC chip
 	+ SWDT: On-Chip System Watchdog Timer
-	+ XADC: On-Chip analog-to-digital converter
 	+ UART: On-Chip UART
 
 
@@ -84,6 +78,8 @@ The following features are not supported and validated:
   o Bus
 	x SFP (PL, zc706, needs specific TRD)
 	x FMC (Needs specific hardware to support special apps)
+	x SPI: On-Chip SPI controller
+	x IEEE 1588 PTP
 
 4. BSP Notes
 ============
@@ -102,14 +98,14 @@ For ZYNQ ZC706 board:
 	Processor:             ZYNQ XC7Z045
 	Board Revision:        HW-Z7-ZC706 REV 1.2
 	BootLoader:            U-Boot (ZC706 customized)
-	BootLoader Version:    U-Boot 2018.01
+	BootLoader Version:    U-Boot 2019.01
 
 For ZYNQ ZC702 board:
 
 	Processor:             ZYNQ XC7Z020
 	Board Revision:        HW-Z7-ZC702 REV 1.2
 	BootLoader:            U-Boot (ZC702 customized)
-	BootLoader Version:    U-Boot 2018.01
+	BootLoader Version:    U-Boot 2019.01
 
 4.1.2 Specify boot medium
 -------------------------

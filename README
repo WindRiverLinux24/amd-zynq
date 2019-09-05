@@ -369,34 +369,7 @@ root@QZ706:~#
 
 Refer to Documentation/trace/coresight.txt for more information.
 
-5.3 IEEE 1588 PTP testing
--------------------------
-
-5.3.1 Introduction
-------------------
-
-This testing method is based on the Linux PTP project, which provides a robust
-implementation of the standard and uses the most relevant and modern API
-offered by the Linux kernel. Only basic testing is done on this BSP because
-accurate PTP testing is a bit complicated according to IEEE PTPv2.
-
-5.3.2 Usage and verification
-----------------------------
-
-Two boards are necessary for this case, one will be used as master, another as slave.
-The following commands show how to use PTP time in stamping mode based on the
-peer delay (P2P) mechanism:
-
-     master :
-     root@128:/# ptpd2 -i eth0 -MV
-
-     slave:
-     root@128:/# ptpd2 -i eth0 -sV --section:kp=0.32 --section:ki=0.05
-
-If master starts timing services succuessfully, then ptpd works fine.
-
-
-5.4. Creating Partitioned Images(WIC)
+5.3. Creating Partitioned Images(WIC)
 ------------------------------------
 
 You can use the OpenEmbedded Image Creator, wic, to create a properly
@@ -414,7 +387,7 @@ tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-glibc-<rootfs_type>-xilinx-zyn
 
 You can then write the output image to an SD card.
 
-5.4.1 Burn images to SD card
+5.3.1 Burn images to SD card
 ----------------------------
 
 To burn u-boot and WIC images to an SD card, you need to execute two steps:
@@ -431,7 +404,7 @@ Then, deploy BOOT.BIN file for the specific board according to bootloader/README
 
    # sudo cp path_to_BOOT.BIN path_to_sdx1_mount_point
 
-5.4.2 Set u-boot env
+5.3.2 Set u-boot env
 --------------------
 
 The board can boot automatically by setting the following uboot environment variables:
@@ -447,20 +420,20 @@ Note: For xilinx-zynq pl, you should copy your boot.bin to replace the old versi
 Note: Above environment variables example is based on zc702 board. For other boards, please
       do corresponding adjustment.
 
-5.5 kexec and kdump
+5.4 kexec and kdump
 -------------------
 
 You need to add feature/kexec support as follow:
 
 	./wrlinux-x/setup.sh --machines xilinx-zynq --templates feature/kexec,feature/kdump
 
-5.5.1 kexec
+5.4.1 kexec
 -----------
 
 	kexec -l  /root/vmlinux --append="`cat /proc/cmdline`"
 	kexec -e
 
-5.5.2 kdump
+5.4.2 kdump
 -----------
 
 Add crashkernel=256M@128M to the kernel cmdline
@@ -468,10 +441,10 @@ Add crashkernel=256M@128M to the kernel cmdline
    echo c > /proc/sysrq-trigger
 
 
-5.6 FPGA bitstream infusion
+5.5 FPGA bitstream infusion
 ---------------------------
 
-5.6.1 introduction
+5.5.1 introduction
 ------------------
 
 The Zynq Programmable Logic can be programmed either using fsbl, U-Boot or
@@ -488,7 +461,7 @@ too. It means you should read and study the related tech documents to make
 sure the match between your bitstream design logic and the overlay dtsi, or
 it might malfunction your hardware devices.
 
-5.6.2 Usage
+5.5.2 Usage
 -----------
 
 Below sections describe steps just to infuse the default bitstream from SDK
