@@ -76,19 +76,19 @@ along with patch descriptions, use git to see what changed on the default
 kernel (git whatchanged <kernel_type>..<bsp_name>). For example:
 
 	# cd path_to_project/tmp-glibc/work-shared/xilinx-zynq/kernel-source
-	# git whatchanged standard/base..HEAD
+	# git whatchanged v5.2/standard/base..HEAD
 
 
 4. Boot Instructions
 ====================
 
 It is necessary to load the DTB (device tree blob) into the target's memory
-prior to booting the kernel uImage. The DTB file can be found in the export
+prior to booting the kernel zImage. The DTB file can be found in the image
 directory after building a project, or you can generate it manually with the
 following commands:
 
 	# bitbake -c devshell virtual/kernel
-	# make xilinx/zynq-<Board Name>.dtb
+	# make zynq-<Board Name>.dtb
 
 Note: <Board Name> can be one of the ZYNQ boards' name, such as zc706, zc702.
 
@@ -136,9 +136,9 @@ Suppose the device node for the MMC/SD card on the host machine is
 
 	# mkdir /mnt/sd
 	# mount /dev/mmcblk0p1 /mnt/sd
-	# cd <buildprj>/export/images/
-	# cp zImage-xilinx-zynq.bin  /mnt/sd/zImage
-	# cp zImage-zynq-<Board Name>.dtb /mnt/sd/devicetree.dtb
+	# cd <buildprj>/tmp-glibc/deploy/images/xilinx-zynq
+	# cp zImage  /mnt/sd/zImage
+	# cp zynq-<Board Name>.dtb /mnt/sd/devicetree.dtb
 	# umount /mnt/sd
 
 
@@ -151,8 +151,8 @@ ext3. Then, mount and deploy the root filesystem image to the partition:
 
 	# mkfs.ext4 /dev/mmcblk0p2
 	# mount /dev/mmcblk0p2 /mnt/sd
-	# cd <buildprj>/export/images/
-	# tar -C /mnt/sd -jxf wrlinux-image-glibc-std-xilinx-zynq.tar.bz2 --numeric-owner
+	# cd <buildprj>/tmp-glibc/deploy/images/xilinx-zynq
+	# tar -C /mnt/sd -jxf wrlinux-image-std-xilinx-zynq.tar.bz2 --numeric-owner
 	# umount /mnt/sd
 
 
@@ -178,7 +178,7 @@ The storage capacity of the QSPI flash on ZYNQ board is 16MB. The following
 default partitions have been created on it:
 
 	Start			End		Definition
-	0x0			0x100000	qspi-fsbl-uboot
+	0x000000		0x100000	qspi-fsbl-uboot
 	0x100000		0x600000	qspi-linux
 	0x600000		0x620000	qspi-device-tree
 	0x620000		0xc00000	qspi-rootfs
@@ -255,8 +255,8 @@ DTB defaults to mounting the root filesystem from the MMC/SD card.
 4.3.1 Prepare NFS and TFTP servers
 ----------------------------------
 
-The files in the above example can be found in <buildprj>/export/images and
-are copied to the NFS/TFTP server directory.
+The files in the above example can be found in <buildprj>/tmp-glibc/deploy/images/xilinx-zynq/
+and are copied to the NFS/TFTP server directory.
 
 
 4.3.2 Boot from NFS root filesystem
@@ -268,38 +268,18 @@ To boot from an NFS image, execute use following u-boot commands:
 	# setenv serverip 192.168.1.1
 	# setenv rootpath /nfsexport
 	# setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/nfs rw nfsroot=$serverip:$rootpath ip=dhcp
-	# tftpboot 0x3000000 zImage-xilinx-zynq.bin
-	# tftpboot 0x2a00000 zImage-zynq-<Board Name>.dtb
+	# tftpboot 0x3000000 zImage
+	# tftpboot 0x2a00000 zynq-<Board Name>.dtb
 	# bootz 0x3000000 - 0x2a00000
 
 
 5. Features
 ===========
 
-5.1 DRM HDMI display
---------------------
-
-5.1.1 Introduction
-------------------
-
-The specific adv7511 boot image BOOT.BIN built from bootloader/README for zc702
-and zc706 include multimedia design to show the capabilities of HDMI display by
-onboard HDMI interfaces.
-
-5.1.2 Usage and verification
-----------------------------
-
-A glibc-std-sato filesystem is used to start matchbox on an HDMI monitor, so
-the "--distros glibc-std-sato" parameter should be passd to setup.sh:
-        ../setup.sh --distros glibc-std-sato ...
-
-before rebuilding:
-        bitbake wrlinux-image-glibc-std-sato
-
-5.2 Coresight operations on Xilinx-7000 series:
+5.1 Coresight operations on Xilinx-7000 series:
 -----------------------------------------------
 
-5.2.1 Introduction
+5.1.1 Introduction
 ------------------
 
 The ARM CoreSight architecture defines four classes of CoreSight components:
@@ -313,12 +293,7 @@ capability is based on the ARM CoreSight and consists mostly of ARM-supplied
 components, but also includes one Xilinx-supplied component (FTM Programmable
 Logic Test and Debug).
 
-Coresight is enabled using KERNEL_FEATURES_append in local.conf during
-project configuration. The following command illustrates this step:
-
-echo "KERNEL_FEATURES_append = \" features/coresight/coresight.scc\"" >> conf/local.conf
-
-5.2.2 Usage and verification
+5.1.2 Usage and verification
 ----------------------------
 
 root@QZ706:~#
@@ -339,10 +314,6 @@ addr_stop     ctxid_pid       nr_ctxid_cmp    seq_32_event    uevent
 cntr_event    enable_event    power	      seq_curr_state
 cntr_idx      enable_source   reset	      status
 root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# echo 1 > enable_source
-coresight-etb10 f8801000.etb: ETB enabled
-coresight-replicator amba:replicator: REPLICATOR enabled
-coresight-funnel f8804000.funnel: FUNNEL inport 0 enabled
-coresight-etm3x f889c000.ptm: ETM tracing enabled
 root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# cd ../f8801000.etb
 root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# ls mgmt/
 ctl  ffcr  ffsr  rdp  rrp  rwp  sts  trg
@@ -369,7 +340,7 @@ root@QZ706:~#
 
 Refer to Documentation/trace/coresight.txt for more information.
 
-5.3. Creating Partitioned Images(WIC)
+5.2. Creating Partitioned Images(WIC)
 ------------------------------------
 
 You can use the OpenEmbedded Image Creator, wic, to create a properly
@@ -383,18 +354,18 @@ This BSP supports SD card disk images.
 After building the project, you will have a WIC image under the directory
 tmp-glibc/deploy/images/<bsp name>/, for example:
 
-tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-glibc-<rootfs_type>-xilinx-zynq.wic
+tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-<rootfs_type>-xilinx-zynq.wic
 
 You can then write the output image to an SD card.
 
-5.3.1 Burn images to SD card
+5.2.1 Burn images to SD card
 ----------------------------
 
 To burn u-boot and WIC images to an SD card, you need to execute two steps:
 
 1) Burn the WIC image
 
-# dd if=wrlinux-image-glibc-<rootfs_type>-xilinx-zynq.wic of=/dev/your_sd_dev
+# dd if=wrlinux-image-<rootfs_type>-xilinx-zynq.wic of=/dev/your_sd_dev
 
 2) Create boot.bin for ZC702/6 board
 
@@ -404,14 +375,14 @@ Then, deploy BOOT.BIN file for the specific board according to bootloader/README
 
    # sudo cp path_to_BOOT.BIN path_to_sdx1_mount_point
 
-5.3.2 Set u-boot env
+5.2.2 Set u-boot env
 --------------------
 
 The board can boot automatically by setting the following uboot environment variables:
 
 => setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
 
-=> setenv bootcmd "fatload mmc 0 ${netstart} zImage;fatload mmc 0 ${dtbnetstart} zImage-zynq-zc702.dtb; \
+=> setenv bootcmd "fatload mmc 0 ${netstart} zImage;fatload mmc 0 ${dtbnetstart} zynq-zc702.dtb; \
    bootz ${netstart} - ${dtbnetstart}"
 
 => saveenv; run bootcmd;
@@ -420,20 +391,20 @@ Note: For xilinx-zynq pl, you should copy your boot.bin to replace the old versi
 Note: Above environment variables example is based on zc702 board. For other boards, please
       do corresponding adjustment.
 
-5.4 kexec and kdump
+5.3 kexec and kdump
 -------------------
 
 You need to add feature/kexec support as follow:
 
 	./wrlinux-x/setup.sh --machines xilinx-zynq --templates feature/kexec,feature/kdump
 
-5.4.1 kexec
+5.3.1 kexec
 -----------
 
 	kexec -l  /root/vmlinux --append="`cat /proc/cmdline`"
 	kexec -e
 
-5.4.2 kdump
+5.3.2 kdump
 -----------
 
 Add crashkernel=256M@128M to the kernel cmdline
@@ -441,16 +412,16 @@ Add crashkernel=256M@128M to the kernel cmdline
    echo c > /proc/sysrq-trigger
 
 
-5.5 FPGA bitstream infusion
+5.4 FPGA bitstream infusion
 ---------------------------
 
-5.5.1 introduction
+5.4.1 introduction
 ------------------
 
 The Zynq Programmable Logic can be programmed either using fsbl, U-Boot or
 through Linux. Here is a link to provide the details about programming the
 PL from Linux world:
-  https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841645/Solution+Zynq+PL+Programming+With+FPGA+Manager
+[1]  https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841645/Solution+Zynq+PL+Programming+With+FPGA+Manager
 
 Notes:
 
@@ -461,17 +432,21 @@ too. It means you should read and study the related tech documents to make
 sure the match between your bitstream design logic and the overlay dtsi, or
 it might malfunction your hardware devices.
 
-5.5.2 Usage
+5.4.2 Usage
 -----------
 
 Below sections describe steps just to infuse the default bitstream from SDK
-v2018.3 without the extra considerations on dtsi match since they had already
+v2019.1 without the extra considerations on dtsi match since they had already
 been done by the vendor. Actually we can just skip over the dtsi part since
 all interfaces have already been into Linux side.
 
-Here, BSP prebuilt xilinx-zc702/6-2018.3/pre-built/linux/images/system.bit
-is used to validate this function, which will be built into system.bit.bin
-according to the link above.
+Download a xilinx prebuilt bitstream file with below link:
+[2]  https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/135364615/Zynq+2019.1+Release
+Then, extract the .bit file from package 2019.1-zc702(zc706)-release.tar.xz
+and rename it into system.bit.
+
+Here, the system.bit is used to validate this function, which will be built
+into system.bit.bin according to the link [1] above.
 
 	#> echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
 	fpga_manager fpga0: writing system.bit.bin to Xilinx Zynq FPGA Manager

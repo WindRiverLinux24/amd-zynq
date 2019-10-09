@@ -40,11 +40,6 @@ the corresponding h/w features exist.
 	+ I2C: On-Chip I2C controller
 	+ QSPI: On-Chip Quad-SPI flash controller
 
-  o Multimedia (PL)
-	+ DRM Graphic: ADI AXI video controller
-	+ HDMI: ADV7511 HDMI transmitter
-	+ XADC: On-Chip analog-to-digital converter
-
   o Network
 	+ GEM: On-Chip Gigabit Ethernet Controller
 	+ PHY: Marvell 88E1116R
@@ -68,7 +63,7 @@ the corresponding h/w features exist.
 	+ RTC: RTC-8564JE, I2C RTC chip
 	+ SWDT: On-Chip System Watchdog Timer
 	+ UART: On-Chip UART
-
+	+ XADC: On-Chip analog-to-digital converter
 
 3.2 Unsupported Features
 ========================
@@ -80,6 +75,8 @@ The following features are not supported and validated:
 	x FMC (Needs specific hardware to support special apps)
 	x SPI: On-Chip SPI controller
 	x IEEE 1588 PTP
+	x DRM Graphic: ADI AXI video controller
+	x HDMI: ADV7511 HDMI transmitter
 
 4. BSP Notes
 ============
@@ -206,20 +203,3 @@ bit stream possibly by bootloader into PL catering for some specific apps.
 So it is very important to make sure the proper PL's code embedded-in for the
 related application testing. And the features appended by "(PL)" mean that they
 fanned out from PL.
-
-4.1.5 dtb notes:
-----------------
-
-There are dtbs in path_to_project/build/tmp-glibc/deploy/images/xilinx-zynq/ as follows:
-
-  zynq-zc706.dtb
-  zynq-zc706-adv7511.dtb
-  zynq-zc702.dtb
-  zynq-zc702-adv7511.dtb
-
-Which are used to boot the board as the following matches:
-
-  zynq-zc706.dtb for ZC706 board
-  zynq-zc706-adv7511.dtb for ZC706 board with HDMI display feature
-  zynq-zc702.dtb for ZC702 board
-  zynq-zc702-adv7511.dtb for ZC702 board with HDMI display feature
