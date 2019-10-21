@@ -59,7 +59,7 @@ The following table summarizes the valid Wind River Linux distros for this BSP.
   +--------------+-------------+-------------+------------------+
   | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-std-sato |
   +--------------+-------------+-------------+------------------+
-  |    valid     |      Y      |      N      |         y        |
+  |    valid     |      Y      |      N      |         Y        |
   +--------------+-------------+-------------+------------------+
 
 For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
@@ -448,10 +448,10 @@ and rename it into system.bit.
 Here, the system.bit is used to validate this function, which will be built
 into system.bit.bin according to the link [1] above.
 
-	#> echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
+	# echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
 	fpga_manager fpga0: writing system.bit.bin to Xilinx Zynq FPGA Manager
 
-	#> cat /sys/class/fpga_manager/fpga0/name
+	# cat /sys/class/fpga_manager/fpga0/name
 	Xilinx Zynq FPGA Manager
 
 Notes:
