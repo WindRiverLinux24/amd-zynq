@@ -324,15 +324,6 @@ root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
 root@QZ706:~# cd
 root@QZ706:~# dd if=/dev/f8801000.etb of=etb
 dd if=/dev/f8801000.etb of=etb
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
-coresight-etb10 f8801000.etb: ETB dumped
 8+0 records in
 8+0 records out
 4096 bytes (4.1 kB) copied, 0.0466603 s, 87.8 kB/s
