@@ -14,14 +14,14 @@ Table of Contents
 
 This BSP supports the following boards:
 
-  + XILINX ZYNQ ZC706 Board  : XC7Z045 processor, Rev 1.2 board.
+  + XILINX ZYNQ ZC706 Board  : XC7Z045 processor, Rev 2.0 board.
   + XILINX ZYNQ ZC702 Board  : XC7Z020 processor, Rev 1.1 board.
 
 2. Change History
 =================
 
   - 2019/06 (LINUXPG-150): WindRiver CI/CD branch support: Add BSP support for ZC702
-			 and ZC706 based on xilinx-sdk-2019.01
+			 and ZC706 based on xilinx-sdk-2019.02
 
 3. BSP Features
 ===============
@@ -93,16 +93,18 @@ in a different environment it may possibly have some issues.
 For ZYNQ ZC706 board:
 
 	Processor:             ZYNQ XC7Z045
-	Board Revision:        HW-Z7-ZC706 REV 1.2
+	Board Revision:        HW-Z7-ZC706 REV 2.0
 	BootLoader:            U-Boot (ZC706 customized)
 	BootLoader Version:    U-Boot 2019.01
+	BOOT.BIN Version:      2019.2-zc706-release
 
 For ZYNQ ZC702 board:
 
 	Processor:             ZYNQ XC7Z020
-	Board Revision:        HW-Z7-ZC702 REV 1.2
+	Board Revision:        HW-Z7-ZC702 REV 1.1
 	BootLoader:            U-Boot (ZC702 customized)
 	BootLoader Version:    U-Boot 2019.01
+	BOOT.BIN Version:      2019.2-zc702-release
 
 4.1.2 Specify boot medium
 -------------------------
