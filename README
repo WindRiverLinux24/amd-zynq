@@ -373,8 +373,8 @@ The board can boot automatically by setting the following uboot environment vari
 
 => setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
 
-=> setenv bootcmd "fatload mmc 0 ${netstart} zImage;fatload mmc 0 ${dtbnetstart} zynq-zc702.dtb; \
-   bootz ${netstart} - ${dtbnetstart}"
+=> setenv bootcmd "fatload mmc 0 0x3000000 zImage;fatload mmc 0 0x2a00000 zynq-zc702.dtb; \
+   bootz 0x3000000 - 0x2a00000"
 
 => saveenv; run bootcmd;
 
