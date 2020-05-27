@@ -299,12 +299,11 @@ Logic Test and Debug).
 root@QZ706:~#
 root@QZ706:~# cd /sys/bus/coresight/devices
 root@QZ706:/sys/bus/coresight/devices# ls
-amba:replicator  f8803000.tpiu	  f889c000.ptm
-f8801000.etb	 f8804000.funnel  f889d000.ptm
+etb0  etm0  etm1  funnel0  replicator0  tpiu0
 root@QZ706:/sys/bus/coresight/devices#
-root@QZ706:/sys/bus/coresight/devices# echo 1 > f8801000.etb/enable_sink
-root@QZ706:/sys/bus/coresight/devices# cd f889c000.ptm
-root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# ls
+root@QZ706:/sys/bus/coresight/devices# echo 1 > etb0/enable_sink
+root@QZ706:/sys/bus/coresight/devices# cd etm0
+root@QZ706:/sys/bus/coresight/devices/etm0# ls
 addr_acctype  cntr_rld_event  etmsr	      seq_12_event    subsystem
 addr_idx      cntr_rld_val    fifofull_level  seq_13_event    sync_freq
 addr_range    cntr_val	      mode	      seq_21_event    timestamp_event
@@ -313,16 +312,16 @@ addr_start    ctxid_mask      nr_cntr	      seq_31_event    trigger_event
 addr_stop     ctxid_pid       nr_ctxid_cmp    seq_32_event    uevent
 cntr_event    enable_event    power	      seq_curr_state
 cntr_idx      enable_source   reset	      status
-root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# echo 1 > enable_source
-root@QZ706:/sys/bus/coresight/devices/f889c000.ptm# cd ../f8801000.etb
-root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# ls mgmt/
+root@QZ706:/sys/bus/coresight/devices/etm0# echo 1 > enable_source
+root@QZ706:/sys/bus/coresight/devices/etm0# cd ../etb0
+root@xilinx-zynq:/sys/bus/coresight/devices/etb0# ls mgmt/
 ctl  ffcr  ffsr  rdp  rrp  rwp  sts  trg
-root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
+root@xilinx-zynq:/sys/bus/coresight/devices/etb0# cat mgmt/rwp
 0x188				<--- changed everytime when cat mgmt/rwp
-root@xilinx-zynq:/sys/bus/coresight/devices/f8801000.etb# cat mgmt/rwp
+root@xilinx-zynq:/sys/bus/coresight/devices/etb0# cat mgmt/rwp
 0x1ee				<--- changed everytime when cat mgmt/rwp
 root@QZ706:~# cd
-root@QZ706:~# dd if=/dev/f8801000.etb of=etb
+root@QZ706:~# dd if=/dev/etb0 of=etb
 dd if=/dev/f8801000.etb of=etb
 8+0 records in
 8+0 records out
