@@ -22,6 +22,7 @@ This BSP supports the following boards:
 
   - 2019/06 (LINUXPG-150): WindRiver CI/CD branch support: Add BSP support for ZC702
 			 and ZC706 based on xilinx-sdk-2019.02
+  - 2020/07 (LINUXPG-472): Add BSP support for ZC702 and ZC706 boards based on xilinx-sdk-2020.01
 
 3. BSP Features
 ===============
@@ -95,16 +96,16 @@ For ZYNQ ZC706 board:
 	Processor:             ZYNQ XC7Z045
 	Board Revision:        HW-Z7-ZC706 REV 2.0
 	BootLoader:            U-Boot (ZC706 customized)
-	BootLoader Version:    U-Boot 2019.01
-	BOOT.BIN Version:      2019.2-zc706-release
+	BootLoader Version:    U-Boot 2020.01
+	BOOT.BIN Version:      2020.1-zc706-release
 
 For ZYNQ ZC702 board:
 
 	Processor:             ZYNQ XC7Z020
 	Board Revision:        HW-Z7-ZC702 REV 1.1
 	BootLoader:            U-Boot (ZC702 customized)
-	BootLoader Version:    U-Boot 2019.01
-	BOOT.BIN Version:      2019.2-zc702-release
+	BootLoader Version:    U-Boot 2020.01
+	BOOT.BIN Version:      2020.1-zc702-release
 
 4.1.2 Specify boot medium
 -------------------------
@@ -212,6 +213,7 @@ Firstly, set BB_NO_NETWORK as '0' in <path-of-project>/build/conf/local.conf fil
 Then following the steps as below to generate the dtb files based on the HDF/XSA files:
 
      $ cd path_of_project
+     $ . ./environment-setup-x86_64-wrlinuxsdk-linux
      $ . ./oe-init-build-env
      $ cat << _EOF >> conf/local.conf
 HDF_BASE = "file://"
@@ -224,5 +226,5 @@ Once bitbake successfully, then you will find the dtb file "system.dtb" in
 the directory:
 <path-of-project>/build/tmp-glibc/deploy/images/xilinx-zynq/system.dtb
 
-NOTE: The version of the xsct tools is v2020.1, so there may be some unpredicatable
+NOTE: The version of the xsct tools is v2020.1, so there may be some unpredictable
 problems if using the HDF/XSA files of older versions.
