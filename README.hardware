@@ -216,6 +216,9 @@ Then following the steps as below to generate the dtb files based on the HDF/XSA
      $ . ./environment-setup-x86_64-wrlinuxsdk-linux
      $ . ./oe-init-build-env
      $ cat << _EOF >> conf/local.conf
+PNWHITELIST_xilinx += 'python3-dtc'
+PNWHITELIST_xilinx-tools += 'external-hdf'
+PNWHITELIST_xilinx += 'device-tree'
 HDF_BASE = "file://"
 HDF_PATH = "/< path-to-hdf >/system.xsa"
 HDF_MACHINE = "zc706-zynq7" or HDF_MACHINE = "zc702-zynq7"
