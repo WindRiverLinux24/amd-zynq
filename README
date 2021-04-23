@@ -384,7 +384,7 @@ You need to add feature/kexec support as follow:
 5.3.1 kexec
 -----------
 
-	kexec -l  /root/vmlinux --append="`cat /proc/cmdline`"
+	kexec -l  /boot/zImage --append="`cat /proc/cmdline`"
 	kexec -e
 
 5.3.2 kdump
