@@ -1,5 +1,5 @@
 require linux-yocto-xilinx-zynq.inc
 
-KBRANCH_xilinx-zynq  = "v5.10/standard/sdkv5.10/xlnx-soc"
+KBRANCH:xilinx-zynq  = "v5.10/standard/sdkv5.10/xlnx-soc"
 
-LINUX_VERSION_xilinx-zynq ?= "5.10.x"
+LINUX_VERSION:xilinx-zynq ?= "5.10.x"
