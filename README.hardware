@@ -23,6 +23,7 @@ This BSP supports the following boards:
   - 2019/06 (LINUXPG-150): WindRiver CI/CD branch support: Add BSP support for ZC702
 			 and ZC706 based on xilinx-sdk-2019.02
   - 2020/07 (LINUXPG-472): Add BSP support for ZC702 and ZC706 boards based on xilinx-sdk-2020.01
+  - 2022/07 (LINUXPG-1140): Add BSP support for ZC702 and ZC706 boards based on xilinx-sdk-2022.01
 
 3. BSP Features
 ===============
