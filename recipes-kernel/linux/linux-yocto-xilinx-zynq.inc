@@ -1,4 +1,6 @@
-COMPATIBLE_MACHINE:xilinx-zynq = "xilinx-zynq"
+#
+# Copyright (C) 2023 Wind River Systems, Inc.
+#
 
-KERNEL_DEVICETREE:xilinx-zynq = "zynq-zc706.dtb \
-                                 zynq-zc702.dtb "
+COMPATIBLE_MACHINE:xilinx-zynq = "xilinx-zynq"
+TARGET_SUPPORTED_KTYPES:xilinx-zynq = "standard preempt-rt"
