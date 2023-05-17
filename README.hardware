@@ -205,28 +205,3 @@ bit stream possibly by bootloader into PL catering for some specific apps.
 So it is very important to make sure the proper PL's code embedded-in for the
 related application testing. And the features appended by "(PL)" mean that they
 fanned out from PL.
-
-4.2 Generate dtb based on HDF/XSA
----------------------------------
-Firstly, set BB_NO_NETWORK as '0' in <path-of-project>/build/conf/local.conf file.
-Then following the steps as below to generate the dtb files based on the HDF/XSA files:
-
-     $ cd path_of_project
-     $ . ./environment-setup-x86_64-wrlinuxsdk-linux
-     $ . ./oe-init-build-env
-     $ cat << _EOF >> conf/local.conf
-WRL_RECIPES_xilinx += 'python3-dtc'
-WRL_RECIPES_xilinx-tools += 'external-hdf'
-WRL_RECIPES_xilinx += 'device-tree'
-HDF_BASE = "file://"
-HDF_PATH = "/< path-to-hdf >/system.xsa"
-HDF_MACHINE = "zc706-zynq7" or HDF_MACHINE = "zc702-zynq7"
-_EOF
-     $ bitbake device-tree
-
-Once bitbake successfully, then you will find the dtb file "system.dtb" in
-the directory:
-<path-of-project>/build/tmp-glibc/deploy/images/xilinx-zynq/system.dtb
-
-NOTE: The version of the xsct tools is v2020.1, so there may be some unpredictable
-problems if using the HDF/XSA files of older versions.

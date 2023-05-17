@@ -56,16 +56,16 @@ THE SOFTWARE.
 The following table summarizes the valid Wind River Linux distros for this BSP.
 'Y' in each content cell stands for supported; 'N' stands for not supported:
 
-  +--------------+-------------+-------------+------------------+
-  | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-std-sato |
-  +--------------+-------------+-------------+------------------+
-  |    valid     |      Y      |      N      |         Y        |
-  +--------------+-------------+-------------+------------------+
+  +--------------+-------------+------------------+
+  | valid/distro |   wrlinux   | wrlinux-graphics |
+  +--------------+-------------+------------------+
+  |    valid     |      Y      |         N        |
+  +--------------+-------------+------------------+
 
 For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
 by running 'bitbake -e virtual/kernel | grep "^TARGET_SUPPORTED_KTYPES="'.
 
-Note: The preempt-rt ktype is not available for this BSP/Machine at this time.
+Note: The preempt-rt ktype can be used with this BSP/Machine.
 
 
 3. Board Specific Patches
@@ -442,3 +442,28 @@ Notes:
 The default firmware path is /lib/firmware, which you should deploy your FPGA
 bitstream bin file into /lib/firmware before you echo the name of it into the
 sys firmware interface. Please refer to the link above for more detailed info.
+
+5.5 Generate dtb based on HDF/XSA
+---------------------------------
+Firstly, set BB_NO_NETWORK as '0' in <path-of-project>/build/conf/local.conf file.
+Then following the steps as below to generate the dtb files based on the HDF/XSA files:
+
+     $ cd path_of_project
+     $ . ./environment-setup-x86_64-wrlinuxsdk-linux
+     $ . ./oe-init-build-env
+     $ cat << _EOF >> conf/local.conf
+CUSTOMER_RECIPES:xilinx += 'python3-dtc'
+CUSTOMER_RECIPES:xilinx-tools += 'external-hdf'
+CUSTOMER_RECIPES:xilinx += 'device-tree'
+HDF_BASE = "file://"
+HDF_PATH = "/< path-to-hdf >/system.xsa"
+HDF_MACHINE = "zc706-zynq7" or HDF_MACHINE = "zc702-zynq7"
+_EOF
+     $ bitbake device-tree
+
+Once bitbake successfully, then you will find the dtb file "system.dtb" in
+the directory:
+<path-of-project>/build/tmp-glibc/deploy/images/xilinx-zynq/system.dtb
+
+NOTE: The version of the xsct tools is v2022.2, so there may be some unpredictable
+problems if using the HDF/XSA files of older versions.
