@@ -95,16 +95,16 @@ For ZYNQ ZC706 board:
 	Processor:             ZYNQ XC7Z045
 	Board Revision:        HW-Z7-ZC706 REV 2.0
 	BootLoader:            U-Boot (ZC706 customized)
-	BootLoader Version:    U-Boot 2022.02
-	BOOT.BIN Version:      2022.2-zc706-release
+	BootLoader Version:    U-Boot 2023.01
+	BOOT.BIN Version:      2023.1-zc706-release
 
 For ZYNQ ZC702 board:
 
 	Processor:             ZYNQ XC7Z020
 	Board Revision:        HW-Z7-ZC702 REV 1.1
 	BootLoader:            U-Boot (ZC702 customized)
-	BootLoader Version:    U-Boot 2022.02
-	BOOT.BIN Version:      2022.2-zc702-release
+	BootLoader Version:    U-Boot 2023.01
+	BOOT.BIN Version:      2023.1-zc702-release
 
 4.1.2 Specify boot medium
 -------------------------

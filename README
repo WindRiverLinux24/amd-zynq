@@ -332,17 +332,15 @@ Refer to Documentation/trace/coresight.txt for more information.
 5.2. Creating Partitioned Images(WIC)
 ------------------------------------
 
-You can use the OpenEmbedded Image Creator, wic, to create a properly
-partitioned image on an SD card. The wic command generates partitioned images
-from existing OpenEmbedded build artifacts.
-For more information about WIC, see:
+You can use the OpenEmbedded Image Creator, wic, to create a properly partitioned
+image on an SD card. The wic command generates partitioned images from existing
+OpenEmbedded build artifacts. For more information about WIC, see:
 
 https://docs.yoctoproject.org/singleindex.html#creating-partitioned-images-using-wic
 
-5.2.1 Build the WIC image within BOOT.BIN in boot partition
------------------------------------------------------------
-BOOT.BIN is the bootloader for zynq board. Because of license issue, it isn't
-integrated into WRLinux. You can download it from the website:
+5.2.1 Build a WIC image within prebuilt BOOT.BIN
+------------------------------------------------
+BOOT.BIN is the bootloader for zynq board. It can be downloaded from the website:
 
 https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842316/Linux+Prebuilt+Images
 
@@ -350,15 +348,44 @@ and then add one line below to local.conf:
 
 IMAGE_BOOT_FILES:append = " /< path-to-BOOT.BIN >/BOOT.BIN;BOOT.BIN"
 
-After having built your project, a partitioned WIC image will be created in the
-deploy folder as follows:
+After building project, a partitioned WIC image will be created in the deploy folder as follows:
 
   path_to_your_project/build/tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-<rootfs_type>-xilinx-zynq.wic
 
 There are two partitions in this WIC images, the first one is to hold the boot
 images(including kernel/dtb/BOOT.BIN), the second is the related root file system.
 
-5.2.2 Boot the board from the WIC SD card
+5.2.2 Build a bootable WIC image
+--------------------------------
+Besides the above method which uses prebuilt BOOT.BIN, WRLinux can build BOOT.BIN and
+create a bootable WIC image by following the steps as below:
+
+     $ cd path_of_project
+     $ . ./environment-setup-x86_64-wrlinuxsdk-linux
+     $ . ./oe-init-build-env
+     $ cat << _EOF >> conf/local.conf
+CUSTOMER_RECIPES:xilinx += 'bootgen'
+CUSTOMER_RECIPES:xilinx += 'u-boot-xlnx-scr'
+CUSTOMER_RECIPES:xilinx += 'xilinx-bootbin'
+CUSTOMER_RECIPES:xilinx += 'device-tree'
+CUSTOMER_RECIPES:xilinx += 'fsbl'
+CUSTOMER_RECIPES:xilinx-tools += 'external-hdf'
+CUSTOMER_RECIPES:xilinx-tools += 'bitstream-extraction'
+CUSTOMER_RECIPES:xilinx-standalone += 'fsbl-firmware'
+CUSTOMER_RECIPES:virtualization-layer += 'python3-dtc'
+IMAGE_BOOT_FILES:append = " \${DEPLOY_DIR_IMAGE}/boot.bin;BOOT.BIN"
+IMAGE_INSTALL:append = " xilinx-bootbin"
+BB_NO_NETWORK = '0'
+HDF_MACHINE = "zc706-zynq7" or HDF_MACHINE = "zc702-zynq7"
+YAML_DT_BOARD_FLAGS = "{BOARD zc706}" or YAML_DT_BOARD_FLAGS = "{BOARD zc702}"
+_EOF
+     $ bitbake wrlinux-image-std
+
+After building project, a partitioned WIC image will be created in the deploy folder as follows:
+
+  path_to_your_project/build/tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-<rootfs_type>-xilinx-zynq.wic
+
+5.2.3 Boot the board from the WIC SD card
 -----------------------------------------
 
 The board can boot automatically by setting the following uboot environment variables:
