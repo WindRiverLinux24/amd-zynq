@@ -385,6 +385,10 @@ After building project, a partitioned WIC image will be created in the deploy fo
 
   path_to_your_project/build/tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-<rootfs_type>-xilinx-zynq.wic
 
+NOTE: For now it is NOT supported that building a zc702 wic image by modifying HDF_MACHINE and YAML_DT_BOARD_FLAGS
+within an existing zc706 project, and vice versa. To build a zc702 or zc706 wic image, it is suggested that these
+wic images are separately built in different projects.
+
 5.2.3 Boot the board from the WIC SD card
 -----------------------------------------
 
