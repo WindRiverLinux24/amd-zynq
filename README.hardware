@@ -113,7 +113,7 @@ The ROM bootloader loads the secondary bootloader from the start or the first
 partition of the selected device and executes it, which is indeed a BOOT.BIN
 image that encapsulates the FSBL and u-boot properly.
 
-Please refer to the 3.1.1 and 3.2.2 section of the README file for the details
+Please refer to the 4.1 and 4.2 section of the README file for the details
 about preparing the secondary bootloader on the MMC/SD card and QSPI Flash
 respectively.
 

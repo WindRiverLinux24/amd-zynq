@@ -94,7 +94,7 @@ Note: <Board Name> can be one of the ZYNQ boards' name, such as zc706, zc702.
 The DTB can then be found in the directory:
   tmp-glibc/work/xilinx_zynq-wrs-linux-gnueabi/linux-yocto/<kernel version>/linux-xilinx_zynq-<kernel type>-build/arch/arm/boot/dts/
 
-Copy the DTB image to MMC/SD or QSPI Flash, and use u-boot's fatload command
+Copy the DTB image to QSPI Flash, and use u-boot's fatload command
 to transfer it to the board before booting along with kernel image.
 
 
@@ -102,66 +102,28 @@ to transfer it to the board before booting along with kernel image.
 -------------------------
 
 MMC/SD can be set as the default boot device for this board, and two
-partitions have been created on the MMC/SD card by default. The first one
-is a boot partition while the second is root filesystem, which can be
-created by the fdisk command on the host machine.
+partitions need to be created on the MMC/SD card by default. The first
+one is a boot partition while the second is root filesystem. Please refer
+to the chapter 5.2 Creating Partitioned Images(WIC) to build a WIC and run
+the following steps to create a MMC/SD card which can boot boards.
 
 Note: Refer to the README.hardware file for further details about the
 configuration for setting MMC/SD as the first boot device.
 
-4.1.1 Create two partitions and store the u-boot image
-------------------------------------------------------
-(1) Create two partitions on the MMC/SD card.
+4.1.1 Burn images to MMC/SD card
+--------------------------------
 
-	# fdisk /dev/mmcblk0
+To burn WIC image to MMC/SD card, user only need to execute the below command:
 
-Suppose the device node for the MMC/SD card on the host machine is
-/dev/mmcblk0.
+# dd if=wrlinux-image-std-xilinx-zynq.wic of=/dev/your_sd_dev
 
-(2) Create a VFAT filesystem on the first partition.
-
-	# mkfs.vfat /dev/mmcblk0p1
-
-(3) Copy the BOOT.BIN file to /dev/mmcblk0p1.
-
-	# mkdir /mnt/sd
-	# mount -t vfat /dev/mmcblk0p1 /mnt/sd
-	# cp BOOT.BIN /mnt/sd
-	# umount /mnt/sd
-
-
-4.1.2 Copy the kernel image and DTB image to /dev/mmcblk0p1
------------------------------------------------------------
-
-	# mkdir /mnt/sd
-	# mount /dev/mmcblk0p1 /mnt/sd
-	# cd <buildprj>/tmp-glibc/deploy/images/xilinx-zynq
-	# cp zImage  /mnt/sd/zImage
-	# cp zynq-<Board Name>.dtb /mnt/sd/devicetree.dtb
-	# umount /mnt/sd
-
-
-4.1.3 Decompress the MMC/SD root filesystem
--------------------------------------------
-
-Assuming the second partition is used for the root filesystem, format it
-with one of the popular filesystem types supported by Linux, such as
-ext3. Then, mount and deploy the root filesystem image to the partition:
-
-	# mkfs.ext4 /dev/mmcblk0p2
-	# mount /dev/mmcblk0p2 /mnt/sd
-	# cd <buildprj>/tmp-glibc/deploy/images/xilinx-zynq
-	# tar -C /mnt/sd -jxf wrlinux-image-std-xilinx-zynq.tar.bz2 --numeric-owner
-	# umount /mnt/sd
-
-
-4.1.4 Boot from the MMC/SD card
--------------------------------
+4.1.2 Boot from MMC/SD card
+---------------------------
 
 To boot from the MMC/SD card, use u-boot commands as follows:
 
 	# mmcinfo
-	# fatload mmc 0 0x2a00000 devicetree.dtb
+	# fatload mmc 0 0x2a00000 zynq-<Board Name>.dtb
 	# fatload mmc 0 0x3000000 zImage
 	# setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
 	# bootz 0x3000000 - 0x2a00000
@@ -214,7 +176,7 @@ the MMC/SD card, its file size will be automatically recorded in u-boot's
 ---------------------------------------------------
 
 	# mmcinfo
-	# fatload mmc 0 0x2a00000 devicetree.dtb
+	# fatload mmc 0 0x2a00000 zynq-<Board Name>.dtb
 	# sf probe 0
 	# sf erase 0x600000 0x20000
 	# sf write 0x2a00000 0x600000 ${filesize}
@@ -396,14 +358,12 @@ The board can boot automatically by setting the following uboot environment vari
 
 => setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
 
-=> setenv bootcmd "fatload mmc 0 0x3000000 zImage;fatload mmc 0 0x2a00000 zynq-zc702.dtb; \
+=> setenv bootcmd "fatload mmc 0 0x3000000 zImage;fatload mmc 0 0x2a00000 zynq-<Board Name>.dtb; \
    bootz 0x3000000 - 0x2a00000"
 
 => saveenv; run bootcmd;
 
 Note: For xilinx-zynq pl, you should copy your boot.bin to replace the old version.
-Note: Above environment variables example is based on zc702 board. For other boards, please
-      do corresponding adjustment.
 
 5.3 kexec and kdump
 -------------------
