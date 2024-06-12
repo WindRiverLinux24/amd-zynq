@@ -1,3 +1,3 @@
-require linux-yocto-xilinx-zynq.inc
+require linux-yocto-amd-zynq.inc
 
-KBRANCH:xilinx-zynq  = "v6.1/standard/preempt-rt/sdkv6.1/xlnx-soc"
+KBRANCH:amd-zynq  = "v6.1/standard/preempt-rt/sdkv6.1/xlnx-soc"

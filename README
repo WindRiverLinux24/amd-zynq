@@ -19,7 +19,7 @@ Contact <support@windriver.com> or your support representative for more
 information on submitting changes.
 
 
-Building the xilinx-zynq layer
+Building the amd-zynq layer
 ------------------------------
 This layer and the wrlinux layer should be added to bblayers.conf.
 
@@ -115,7 +115,7 @@ configuration for setting MMC/SD as the first boot device.
 
 To burn WIC image to MMC/SD card, user only need to execute the below command:
 
-# dd if=wrlinux-image-std-xilinx-zynq.wic of=/dev/your_sd_dev
+# dd if=wrlinux-image-std-amd-zynq.wic of=/dev/your_sd_dev
 
 4.1.2 Boot from MMC/SD card
 ---------------------------
@@ -151,7 +151,7 @@ needed, you can burn the layout of the rest of the QSPI flash.
 You also need to modify the QSPI flash device node in the following DTB source file to
 reflect such changes:
 
-	tmp-glibc/work-shared/xilinx-zynq/kernel-source/arch/arm/boot/dts/zynq-<Board Name>.dts
+	tmp-glibc/work-shared/amd-zynq/kernel-source/arch/arm/boot/dts/zynq-<Board Name>.dts
 
 Then re-generate the DTB image as described above.
 
@@ -216,7 +216,7 @@ DTB defaults to mounting the root filesystem from the MMC/SD card.
 4.3.1 Prepare NFS and TFTP servers
 ----------------------------------
 
-The files in the above example can be found in <buildprj>/tmp-glibc/deploy/images/xilinx-zynq/
+The files in the above example can be found in <buildprj>/tmp-glibc/deploy/images/amd-zynq/
 and are copied to the NFS/TFTP server directory.
 
 
@@ -275,11 +275,11 @@ cntr_event    enable_event    power	      seq_curr_state
 cntr_idx      enable_source   reset	      status
 root@QZ706:/sys/bus/coresight/devices/etm0# echo 1 > enable_source
 root@QZ706:/sys/bus/coresight/devices/etm0# cd ../etb0
-root@xilinx-zynq:/sys/bus/coresight/devices/etb0# ls mgmt/
+root@amd-zynq:/sys/bus/coresight/devices/etb0# ls mgmt/
 ctl  ffcr  ffsr  rdp  rrp  rwp  sts  trg
-root@xilinx-zynq:/sys/bus/coresight/devices/etb0# cat mgmt/rwp
+root@amd-zynq:/sys/bus/coresight/devices/etb0# cat mgmt/rwp
 0x188				<--- changed everytime when cat mgmt/rwp
-root@xilinx-zynq:/sys/bus/coresight/devices/etb0# cat mgmt/rwp
+root@amd-zynq:/sys/bus/coresight/devices/etb0# cat mgmt/rwp
 0x1ee				<--- changed everytime when cat mgmt/rwp
 root@QZ706:~# cd
 root@QZ706:~# dd if=/dev/etb0 of=etb
@@ -312,7 +312,7 @@ IMAGE_BOOT_FILES:append = " /< path-to-BOOT.BIN >/BOOT.BIN;BOOT.BIN"
 
 After building project, a partitioned WIC image will be created in the deploy folder as follows:
 
-  path_to_your_project/build/tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-<rootfs_type>-xilinx-zynq.wic
+  path_to_your_project/build/tmp-glibc/deploy/images/amd-zynq/wrlinux-image-<rootfs_type>-amd-zynq.wic
 
 There are two partitions in this WIC images, the first one is to hold the boot
 images(including kernel/dtb/BOOT.BIN), the second is the related root file system.
@@ -345,7 +345,7 @@ _EOF
 
 After building project, a partitioned WIC image will be created in the deploy folder as follows:
 
-  path_to_your_project/build/tmp-glibc/deploy/images/xilinx-zynq/wrlinux-image-<rootfs_type>-xilinx-zynq.wic
+  path_to_your_project/build/tmp-glibc/deploy/images/amd-zynq/wrlinux-image-<rootfs_type>-amd-zynq.wic
 
 NOTE: For now it is NOT supported that building a zc702 wic image by modifying HDF_MACHINE and YAML_DT_BOARD_FLAGS
 within an existing zc706 project, and vice versa. To build a zc702 or zc706 wic image, it is suggested that these
@@ -363,14 +363,14 @@ The board can boot automatically by setting the following uboot environment vari
 
 => saveenv; run bootcmd;
 
-Note: For xilinx-zynq pl, you should copy your boot.bin to replace the old version.
+Note: For amd-zynq pl, you should copy your boot.bin to replace the old version.
 
 5.3 kexec and kdump
 -------------------
 
 You need to add feature/kexec support as follow:
 
-	./wrlinux-x/setup.sh --machines xilinx-zynq --templates feature/kexec,feature/kdump
+	./wrlinux-x/setup.sh --machines amd-zynq --templates feature/kexec,feature/kdump
 
 5.3.1 kexec
 -----------
@@ -454,7 +454,7 @@ _EOF
 
 Once bitbake successfully, then you will find the dtb file "system.dtb" in
 the directory:
-<path-of-project>/build/tmp-glibc/deploy/images/xilinx-zynq/system.dtb
+<path-of-project>/build/tmp-glibc/deploy/images/amd-zynq/system.dtb
 
 NOTE: The version of the xsct tools is v2022.2, so there may be some unpredictable
 problems if using the HDF/XSA files of older versions.
