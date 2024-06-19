@@ -1,4 +1,4 @@
-XILINX ZYNQ Board Support Package
+AMD ZYNQ Board Support Package
 
 
 Table of Contents
@@ -81,8 +81,8 @@ The following features are not supported and not validated:
 4. BSP Notes
 ============
 
-4.1 XILINX ZYNQ
-===============
+4.1 AMD ZYNQ
+============
 
 4.1.1 Validated Board Info
 --------------------------

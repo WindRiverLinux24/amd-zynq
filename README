@@ -1,4 +1,4 @@
-Xilinx ZYNQ Board Support Package
+AMD ZYNQ Board Support Package
 
 1. About this document
 ======================
@@ -92,7 +92,7 @@ following commands:
 Note: <Board Name> can be one of the ZYNQ boards' name, such as zc706, zc702.
 
 The DTB can then be found in the directory:
-  tmp-glibc/work/xilinx_zynq-wrs-linux-gnueabi/linux-yocto/<kernel version>/linux-xilinx_zynq-<kernel type>-build/arch/arm/boot/dts/
+  tmp-glibc/work/<bsp name>-wrs-linux-gnueabi/linux-yocto/<kernel version>/linux-<bsp name>-<kernel type>-build/arch/arm/boot/dts/
 
 Copy the DTB image to QSPI Flash, and use u-boot's fatload command
 to transfer it to the board before booting along with kernel image.
@@ -237,7 +237,7 @@ To boot from an NFS image, execute use following u-boot commands:
 5. Features
 ===========
 
-5.1 Coresight operations on Xilinx-7000 series:
+5.1 Coresight operations on Zynq-7000 series:
 -----------------------------------------------
 
 5.1.1 Introduction
@@ -248,7 +248,7 @@ access and control, trace source, trace link, and trace sink. Components
 of the access and control class provide a user interface to access the
 debug infrastructure through memory-mapped locations and JTAG (not involved).
 
-The Xilinx 7000 series PS and PL can be debugged together as a complete system
+The Zynq 7000 series PS and PL can be debugged together as a complete system
 using intrusive and non-intrusive debug techniques. This testing and debugging
 capability is based on the ARM CoreSight and consists mostly of ARM-supplied
 components, but also includes one Xilinx-supplied component (FTM Programmable
@@ -423,10 +423,10 @@ Here, the system.bit is used to validate this function, which will be built
 into system.bit.bin according to the link [1] above.
 
 	# echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
-	fpga_manager fpga0: writing system.bit.bin to Xilinx Zynq FPGA Manager
+	fpga_manager fpga0: writing system.bit.bin to AMD Zynq FPGA Manager
 
 	# cat /sys/class/fpga_manager/fpga0/name
-	Xilinx Zynq FPGA Manager
+	AMD Zynq FPGA Manager
 
 Notes:
 
