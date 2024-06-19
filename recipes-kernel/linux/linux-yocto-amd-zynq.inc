@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2023 Wind River Systems, Inc.
+# Copyright (C) 2024 Wind River Systems, Inc.
 #
 
 COMPATIBLE_MACHINE:amd-zynq = "amd-zynq"
