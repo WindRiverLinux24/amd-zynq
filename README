@@ -327,6 +327,9 @@ create a bootable WIC image by following the steps as below:
      $ . ./oe-init-build-env
      $ cat << _EOF >> conf/local.conf
 CUSTOMER_RECIPES:xilinx += 'bootgen'
+CUSTOMER_RECIPES:xilinx += 'u-boot-xlnx'
+CUSTOMER_RECIPES:xilinx += 'u-boot-tools-xlnx'
+PREFERRED_PROVIDER_u-boot-tools-native = "u-boot-tools-xlnx-native"
 CUSTOMER_RECIPES:xilinx += 'u-boot-xlnx-scr'
 CUSTOMER_RECIPES:xilinx += 'xilinx-bootbin'
 CUSTOMER_RECIPES:xilinx += 'device-tree'
