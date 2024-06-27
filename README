@@ -340,6 +340,7 @@ CUSTOMER_RECIPES:xilinx-standalone += 'fsbl-firmware'
 CUSTOMER_RECIPES:virtualization-layer += 'python3-dtc'
 IMAGE_BOOT_FILES:append = " \${DEPLOY_DIR_IMAGE}/boot.bin;BOOT.BIN"
 IMAGE_INSTALL:append = " xilinx-bootbin"
+MACHINE_FEATURES:amd-zynq += " xilinx-bootbin"
 BB_NO_NETWORK = '0'
 HDF_MACHINE = "zc706-zynq7" or HDF_MACHINE = "zc702-zynq7"
 YAML_DT_BOARD_FLAGS = "{BOARD zc706}" or YAML_DT_BOARD_FLAGS = "{BOARD zc702}"
