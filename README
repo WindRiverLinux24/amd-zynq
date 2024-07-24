@@ -233,14 +233,52 @@ To boot from an NFS image, execute use following u-boot commands:
 	# tftpboot 0x2a00000 zynq-<Board Name>.dtb
 	# bootz 0x3000000 - 0x2a00000
 
+5. WIC Notes
+============
 
-5. Features
+User can use the OpenEmbedded Image Creator to create the properly partitioned
+image on a SD card. It generates partitioned images from existing OpenEmbedded
+build artifacts. Please refer to the following URL for more detailed partition
+information about WIC:
+
+https://docs.yoctoproject.org/singleindex.html#creating-partitioned-images-using-wic
+
+This BSP supports disk images for SD card.
+After building the project, user will get a WIC image under the directory
+tmp-glibc/deploy/images/<bsp name>/, such as:
+
+	<PATH_TO_your_project>/tmp-glibc/deploy/images/amd-zynq/wrlinux-image-<rootfs_type>-amd-zynq.rootfs.wic
+
+NOTE: The WIC image built in WRLinux don't contain the bootloader BOOT.BIN
+by default. Please refer to section 6 for the detailed description to create
+a bootable WIC image.
+
+5.1 Burn images to SD card
+--------------------------
+
+To burn WIC image to SD card, user only need to execute the below command:
+
+	# dd if=wrlinux-image-<rootfs_type>-amd-zynq.rootfs.wic of=/dev/your_sd_dev
+
+5.2 Boot the board from the WIC SD card
+---------------------------------------
+
+The board can boot automatically by setting the following uboot environment variables:
+
+=> setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
+
+=> setenv bootcmd "fatload mmc 0 0x3000000 zImage;fatload mmc 0 0x2a00000 zynq-<Board Name>.dtb; \
+   bootz 0x3000000 - 0x2a00000"
+
+=> saveenv; run bootcmd;
+
+6. Features
 ===========
 
-5.1 Coresight operations on Zynq-7000 series:
------------------------------------------------
+6.1 Coresight
+-------------
 
-5.1.1 Introduction
+6.1.1 Introduction
 ------------------
 
 The ARM CoreSight architecture defines four classes of CoreSight components:
@@ -254,7 +292,7 @@ capability is based on the ARM CoreSight and consists mostly of ARM-supplied
 components, but also includes one Xilinx-supplied component (FTM Programmable
 Logic Test and Debug).
 
-5.1.2 Usage and verification
+6.1.2 Usage and verification
 ----------------------------
 
 root@QZ706:~#
@@ -291,36 +329,41 @@ root@QZ706:~#
 
 Refer to Documentation/trace/coresight.txt for more information.
 
-5.2. Creating Partitioned Images(WIC)
-------------------------------------
+6.2 Bootloader
+--------------
 
-You can use the OpenEmbedded Image Creator, wic, to create a properly partitioned
-image on an SD card. The wic command generates partitioned images from existing
-OpenEmbedded build artifacts. For more information about WIC, see:
+BOOT.BIN is the bootloader for zynq7000 boards. There are two ways to generate BOOT.BIN.
 
-https://docs.yoctoproject.org/singleindex.html#creating-partitioned-images-using-wic
+6.2.1 Generate BOOT.BIN with prebuilt firmwares
+-----------------------------------------------
 
-5.2.1 Build a WIC image within prebuilt BOOT.BIN
-------------------------------------------------
-BOOT.BIN is the bootloader for zynq board. It can be downloaded from the website:
+Run the following steps to generate BOOT.BIN
 
-https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842316/Linux+Prebuilt+Images
+	$ git clone https://github.com/Xilinx/soc-prebuilt-firmware.git
+	$ cd soc-prebuilt-firmware
+	$ git checkout xlnx_rel_v2024.1
+	$ cd zc702-zynq
+	$ source <PATH_TO_Vivado>/2024.1/settings64.sh
+	$ bootgen -arch zynq -image bootgen.bif -o ./BOOT.BIN -w
 
-and then add one line below to local.conf:
+And the BOOT.BIN can be installed into the WIC image:
 
+	$ cd path_of_project
+	$ . ./environment-setup-x86_64-wrlinuxsdk-linux
+    $ . ./oe-init-build-env
+    $ cat << _EOF >> conf/local.conf
 IMAGE_BOOT_FILES:append = " /< path-to-BOOT.BIN >/BOOT.BIN;BOOT.BIN"
+_EOF
+    $ bitbake wrlinux-image-std
 
-After building project, a partitioned WIC image will be created in the deploy folder as follows:
+Note: For now, only the prebuilt firmwares for zc702 are provided by AMD,
+the bootloader for zc706 should be built by following the steps in 6.2.2.
 
-  path_to_your_project/build/tmp-glibc/deploy/images/amd-zynq/wrlinux-image-<rootfs_type>-amd-zynq.wic
-
-There are two partitions in this WIC images, the first one is to hold the boot
-images(including kernel/dtb/BOOT.BIN), the second is the related root file system.
-
-5.2.2 Build a bootable WIC image
---------------------------------
-Besides the above method which uses prebuilt BOOT.BIN, WRLinux can build BOOT.BIN and
-create a bootable WIC image by following the steps as below:
+6.2.2 Build BOOT.BIN in WRLinux
+-------------------------------
+Besides the above method which uses prebuilt firmwares to generate BOOT.BIN,
+WRLinux can build BOOT.BIN and create a bootable WIC image by following the
+steps as below:
 
      $ cd path_of_project
      $ . ./environment-setup-x86_64-wrlinuxsdk-linux
@@ -355,34 +398,20 @@ NOTE: For now it is NOT supported that building a zc702 wic image by modifying H
 within an existing zc706 project, and vice versa. To build a zc702 or zc706 wic image, it is suggested that these
 wic images are separately built in different projects.
 
-5.2.3 Boot the board from the WIC SD card
------------------------------------------
-
-The board can boot automatically by setting the following uboot environment variables:
-
-=> setenv bootargs console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 ro rootwait
-
-=> setenv bootcmd "fatload mmc 0 0x3000000 zImage;fatload mmc 0 0x2a00000 zynq-<Board Name>.dtb; \
-   bootz 0x3000000 - 0x2a00000"
-
-=> saveenv; run bootcmd;
-
-Note: For amd-zynq pl, you should copy your boot.bin to replace the old version.
-
-5.3 kexec and kdump
+6.3 kexec and kdump
 -------------------
 
 You need to add feature/kexec support as follow:
 
 	./wrlinux-x/setup.sh --machines amd-zynq --templates feature/kexec,feature/kdump
 
-5.3.1 kexec
+6.3.1 kexec
 -----------
 
 	kexec -l  /boot/zImage --append="`cat /proc/cmdline`"
 	kexec -e
 
-5.3.2 kdump
+6.3.2 kdump
 -----------
 
 Add crashkernel=256M@128M to the kernel cmdline
@@ -390,10 +419,10 @@ Add crashkernel=256M@128M to the kernel cmdline
    echo c > /proc/sysrq-trigger
 
 
-5.4 FPGA bitstream infusion
+6.4 FPGA bitstream infusion
 ---------------------------
 
-5.4.1 introduction
+6.4.1 introduction
 ------------------
 
 The Zynq Programmable Logic can be programmed either using fsbl, U-Boot or
@@ -410,7 +439,7 @@ too. It means you should read and study the related tech documents to make
 sure the match between your bitstream design logic and the overlay dtsi, or
 it might malfunction your hardware devices.
 
-5.4.2 Usage
+6.4.2 Usage
 -----------
 
 Below sections describe steps just to infuse the default bitstream from SDK
@@ -438,7 +467,7 @@ The default firmware path is /lib/firmware, which you should deploy your FPGA
 bitstream bin file into /lib/firmware before you echo the name of it into the
 sys firmware interface. Please refer to the link above for more detailed info.
 
-5.5 Generate dtb based on HDF/XSA
+6.5 Generate dtb based on HDF/XSA
 ---------------------------------
 Firstly, set BB_NO_NETWORK as '0' in <path-of-project>/build/conf/local.conf file.
 Then following the steps as below to generate the dtb files based on the HDF/XSA files:
