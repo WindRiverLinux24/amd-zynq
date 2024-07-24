@@ -418,54 +418,106 @@ Add crashkernel=256M@128M to the kernel cmdline
    kexec -p /boot/zImage --append="$your-bootcmd"
    echo c > /proc/sysrq-trigger
 
+6.4 FPGA Bitstream File Update
+------------------------------
 
-6.4 FPGA bitstream infusion
----------------------------
+On amd-zynq platforms, customer is able to update their own FPGA design image
+from linux side in running time. Here is an example of PL programming from linux
+using the Linux FPGA Manager framework. In this example, we will program a prebuilt
+bitstream file "download.bit" into FPGA.
 
-6.4.1 introduction
-------------------
+6.4.1 Generate Bitstream Binary file
+------------------------------------
 
-The Zynq Programmable Logic can be programmed either using fsbl, U-Boot or
-through Linux. Here is a link to provide the details about programming the
-PL from Linux world:
-[1]  https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841645/Solution+Zynq+PL+Programming+With+FPGA+Manager
+Because amd-zynq platform only supports binary format for updating FPGA, it is needed
+to change the .bit file into binary format with below commands:
 
-Notes:
+	$ git clone https://github.com/Xilinx/soc-prebuilt-firmware.git
+	$ cd soc-prebuilt-firmware
+	$ git checkout xlnx_rel_v2024.1
+	$ cd zcu702-zynq
+	$ source <PATH_TO_Vivado>/2024.1/settings64.sh
+	$ bootgen -image Bitstream.bif -arch zynq -process_bitstream bin -o ./system.bit.bin
 
-The descriptions in subsequent sections refer to use of Device Tree Overlay
-fragments with FPGA manager framework. It has to be noted that they are not
-supported in official Xilinx SDK release, and WRLinux just keep them AS-IS
-too. It means you should read and study the related tech documents to make
-sure the match between your bitstream design logic and the overlay dtsi, or
-it might malfunction your hardware devices.
+The content of Bitstream.bif is listed as follow:
 
-6.4.2 Usage
------------
+	all:
+	{
+		download.bit	/* Bitstream file name */
+	}
 
-Below sections describe steps just to infuse the default bitstream from SDK
-v2019.1 without the extra considerations on dtsi match since they had already
-been done by the vendor. Actually we can just skip over the dtsi part since
-all interfaces have already been into Linux side.
+6.4.2 Generate Device Tree Overlay (DTO)
+----------------------------------------
 
-Download a xilinx prebuilt bitstream file with below link:
-[2]  https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/135364615/Zynq+2019.1+Release
-Then, extract the .bit file from package 2019.1-zc702(zc706)-release.tar.xz
-and rename it into system.bit.
+We create a pl.dtsi file and its contents is listed as follow:
 
-Here, the system.bit is used to validate this function, which will be built
-into system.bit.bin according to the link [1] above.
+	// pl.dtsi overlay dts file.
+	/dts-v1/;
+	/plugin/;
 
+	/ {
+		fragment@0 {
+			target = <&fpga_full>;
+			__overlay__ {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				firmware-name = "system.bit.bin";
+			};
+		};
+	};
+
+Then we generate Device Tree Overlay Blob (.dtbo) file from
+the pl.dtsi file as below:
+
+	$ dtc -O dtb -o pl.dtbo -b 0 -@ pl.dtsi
+
+Deploy system.bit.bin and pl.dtbo files into rootfs.
+
+6.4.3 Update FPGA bitstream file
+--------------------------------
+
+There are two ways to program the bitstream file:
+	- using Device Tree Overlay
+	- using sysfs interface
+
+6.4.3.1 Update FPGA by using Device Tree Overlay
+------------------------------------------------
+
+Boot up kernel and login, then run below commands in terminal.
+
+1) Set flags for Full Bitstream.
+	# echo 0 > /sys/class/fpga_manager/fpga0/flags
+
+2) Copy the Full Bitstream (.bin) and pl.dtbo files into firmware folder
+	# mkdir -p /lib/firmware
+	# cp xxx/system.bit.bin /lib/firmware/system.bit.bin
+	# cp xxx/pl.dtbo /lib/firmware/pl.dtbo
+
+3) Apply overlay DTB(pl.dtbo) to add live device nodes
+	# mkdir /sys/kernel/config/device-tree/overlays/system
+	# cd /lib/firmware/
+	# echo pl.dtbo > /sys/kernel/config/device-tree/overlays/system/path
+
+4) Steps to remove device nodes
+	# rmdir /sys/kernel/config/device-tree/overlays/system
+
+6.4.3.2 Update FPGA by using sysfs interface
+--------------------------------------------
+
+Boot up kernel and login, then run below commands in terminal.
+
+	# echo 0 > /sys/class/fpga_manager/fpga0/flags
+	# mkdir -p /lib/firmware
+	# cp xxx/system.bit.bin /lib/firmware/system.bit.bin
+	# cd /lib/firmware
 	# echo system.bit.bin > /sys/class/fpga_manager/fpga0/firmware
-	fpga_manager fpga0: writing system.bit.bin to AMD Zynq FPGA Manager
 
-	# cat /sys/class/fpga_manager/fpga0/name
-	AMD Zynq FPGA Manager
+6.4.4 Note
+--------
+If customer wants to enable new peripherals that reside in the new FPGA bitstream from linux side,
+overlay solution is able to implement the requirement. Detail description, please refer to below link.
+https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841645/Solution+Zynq+PL+Programming+With+FPGA+Manager
 
-Notes:
-
-The default firmware path is /lib/firmware, which you should deploy your FPGA
-bitstream bin file into /lib/firmware before you echo the name of it into the
-sys firmware interface. Please refer to the link above for more detailed info.
 
 6.5 Generate dtb based on HDF/XSA
 ---------------------------------
@@ -487,7 +539,9 @@ _EOF
 
 Once bitbake successfully, then you will find the dtb file "system.dtb" in
 the directory:
-<path-of-project>/build/tmp-glibc/deploy/images/amd-zynq/system.dtb
 
-NOTE: The version of the xsct tools is v2022.2, so there may be some unpredictable
-problems if using the HDF/XSA files of older versions.
+	<path-of-project>/build/tmp-glibc/deploy/images/amd-zynq/system.dtb
+
+NOTE: Please make sure the version of the xsct tools is in accordance with the version
+of HDF/XSA files, and there may be some unpredictable problems if using the HDF/XSA
+files of older versions.
