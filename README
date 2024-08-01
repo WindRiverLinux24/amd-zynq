@@ -247,7 +247,7 @@ This BSP supports disk images for SD card.
 After building the project, user will get a WIC image under the directory
 tmp-glibc/deploy/images/<bsp name>/, such as:
 
-	<PATH_TO_your_project>/tmp-glibc/deploy/images/amd-zynq/wrlinux-image-<rootfs_type>-amd-zynq.rootfs.wic
+	<path_to_your_project>/tmp-glibc/deploy/images/amd-zynq/wrlinux-image-<rootfs_type>-amd-zynq.rootfs.wic
 
 NOTE: The WIC image built in WRLinux don't contain the bootloader BOOT.BIN
 by default. Please refer to section 6 for the detailed description to create
@@ -343,7 +343,7 @@ Run the following steps to generate BOOT.BIN
 	$ cd soc-prebuilt-firmware
 	$ git checkout xlnx_rel_v2024.1
 	$ cd zc702-zynq
-	$ source <PATH_TO_Vivado>/2024.1/settings64.sh
+	$ source <path_to_Vivado>/2024.1/settings64.sh
 	$ bootgen -arch zynq -image bootgen.bif -o ./BOOT.BIN -w
 
 And the BOOT.BIN can be installed into the WIC image:
@@ -381,7 +381,7 @@ CUSTOMER_RECIPES:xilinx-tools += 'external-hdf'
 CUSTOMER_RECIPES:xilinx-tools += 'bitstream-extraction'
 CUSTOMER_RECIPES:xilinx-standalone += 'fsbl-firmware'
 CUSTOMER_RECIPES:virtualization-layer += 'python3-dtc'
-IMAGE_BOOT_FILES:append = " \${DEPLOY_DIR_IMAGE}/boot.bin;BOOT.BIN"
+IMAGE_BOOT_FILES:append = " boot.bin;BOOT.BIN"
 IMAGE_INSTALL:append = " xilinx-bootbin"
 MACHINE_FEATURES:amd-zynq += " xilinx-bootbin"
 BB_NO_NETWORK = '0'
@@ -436,7 +436,7 @@ to change the .bit file into binary format with below commands:
 	$ cd soc-prebuilt-firmware
 	$ git checkout xlnx_rel_v2024.1
 	$ cd zcu702-zynq
-	$ source <PATH_TO_Vivado>/2024.1/settings64.sh
+	$ source <path_to_Vivado>/2024.1/settings64.sh
 	$ bootgen -image Bitstream.bif -arch zynq -process_bitstream bin -o ./system.bit.bin
 
 The content of Bitstream.bif is listed as follow:
