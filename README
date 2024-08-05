@@ -376,6 +376,7 @@ PREFERRED_PROVIDER_u-boot-tools-native = "u-boot-tools-xlnx-native"
 CUSTOMER_RECIPES:xilinx += 'u-boot-xlnx-scr'
 CUSTOMER_RECIPES:xilinx += 'xilinx-bootbin'
 CUSTOMER_RECIPES:xilinx += 'device-tree'
+CUSTOMER_RECIPES:xilinx-tools += 'xsct'
 CUSTOMER_RECIPES:xilinx += 'fsbl'
 CUSTOMER_RECIPES:xilinx-tools += 'external-hdf'
 CUSTOMER_RECIPES:xilinx-tools += 'bitstream-extraction'
@@ -531,6 +532,7 @@ Then following the steps as below to generate the dtb files based on the HDF/XSA
 CUSTOMER_RECIPES:xilinx += 'python3-dtc'
 CUSTOMER_RECIPES:xilinx-tools += 'external-hdf'
 CUSTOMER_RECIPES:xilinx += 'device-tree'
+CUSTOMER_RECIPES:xilinx-tools += 'xsct'
 HDF_BASE = "file://"
 HDF_PATH = "/< path-to-hdf >/system.xsa"
 HDF_MACHINE = "zc706-zynq7" or HDF_MACHINE = "zc702-zynq7"
