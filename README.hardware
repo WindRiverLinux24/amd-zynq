@@ -22,6 +22,7 @@ This BSP supports the following boards:
 
   - 2024/08 (LINUXPG-2279): Add BSP support for ZC702 board based on SDK v2024.01
   - 2024/08 (LINUXPG-2280): Add BSP support for ZC706 board based on SDK v2024.01
+  - 2025/01 (LINUXEXEC-33568): Update BSP support for ZC702/ZC706 board based on SDK v2024.2
 
 3. BSP Features
 ===============
